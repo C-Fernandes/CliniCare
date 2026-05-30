@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import './UserModal.scss';
-import { Button, FormField, Modal } from '../ui';
+import { Button, FormField, Modal } from '../UI';
 
 export type UserRole = 'ADMIN' | 'PROFESSIONAL';
 

@@ -6,10 +6,10 @@ import {
 } from 'lucide-react';
 
 import './Dashboard.scss';
-import { DashboardPanel } from '../../components/dashboard/DashboardPanel/DashboardPanel';
-import { EvolutionItem } from '../../components/dashboard/EvolutionItem/EvolutionItem';
-import { NotificationItem } from '../../components/dashboard/NotificationItem/NotificationItem';
-import { StatCard } from '../../components/dashboard/StatCard/StatCard';
+import { DashboardPanel } from '../../components/Dashboard/DashboardPanel/DashboardPanel';
+import { EvolutionItem } from '../../components/Dashboard/EvolutionItem/EvolutionItem';
+import { NotificationItem } from '../../components/Dashboard/NotificationItem/NotificationItem';
+import { StatCard } from '../../components/Dashboard/StatCard/StatCard';
 
 const recentEvolutions = [
     {

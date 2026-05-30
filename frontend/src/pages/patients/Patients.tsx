@@ -3,7 +3,7 @@ import { Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PatientModal } from '../../components/PatientModal/PatientModal';
-import { Badge, Button, DataTable, IconButton } from '../../components/ui';
+import { Badge, Button, DataTable, IconButton } from '../../components/UI';
 
 import './Patients.scss';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';

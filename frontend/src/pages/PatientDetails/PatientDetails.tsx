@@ -2,7 +2,7 @@ import { ArrowLeft, Pencil, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import './PatientDetails.scss';
-import { Badge, Button, Card } from '../../components/ui';
+import { Badge, Button, Card } from '../../components/UI';
 
 type PatientStatus =
     | 'IN_FOLLOW_UP'

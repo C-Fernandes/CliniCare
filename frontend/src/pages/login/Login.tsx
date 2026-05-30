@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 
 import './Login.scss';
+import { Button, Card, FormField } from '../../components/UI';
 
 export function Login() {
     const navigate = useNavigate();
@@ -29,37 +30,37 @@ export function Login() {
                     <p>Acompanhamento clínico inteligente de pacientes</p>
                 </div>
 
-                <form className="login-card" onSubmit={handleSubmit}>
+                <Card as="form" className="login-card" onSubmit={handleSubmit}>
                     <div className="login-card__header">
                         <h2>Entrar</h2>
                         <p>Acesse sua conta para continuar</p>
                     </div>
 
-                    <div className="login-form__group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            placeholder="Digite seu email"
-                            onChange={(event) => setEmail(event.target.value)}
-                        />
-                    </div>
+                    <FormField
+                        htmlFor="email"
+                        label="Email"
+                        controlProps={{
+                            onChange: (event) => setEmail(event.target.value),
+                            placeholder: 'Digite seu email',
+                            type: 'email',
+                            value: email,
+                        }}
+                    />
 
-                    <div className="login-form__group">
-                        <label htmlFor="password">Senha</label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            placeholder="Digite sua senha"
-                            onChange={(event) => setPassword(event.target.value)}
-                        />
-                    </div>
+                    <FormField
+                        htmlFor="password"
+                        label="Senha"
+                        controlProps={{
+                            onChange: (event) => setPassword(event.target.value),
+                            placeholder: 'Digite sua senha',
+                            type: 'password',
+                            value: password,
+                        }}
+                    />
 
-                    <button type="submit" className="login-button">
+                    <Button className="login-button" fullWidth type="submit">
                         Entrar
-                    </button>
+                    </Button>
 
                     <div className="login-demo">
                         <p>
@@ -69,7 +70,7 @@ export function Login() {
                             <strong>pedro.henrique@clinicare.com</strong> (profissional)
                         </p>
                     </div>
-                </form>
+                </Card>
             </section>
         </main>
     );

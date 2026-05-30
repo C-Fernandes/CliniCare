@@ -1,4 +1,4 @@
-import { Badge } from '../../ui';
+import { Badge } from '../../UI';
 
 interface EvolutionItemProps {
     attention: string;

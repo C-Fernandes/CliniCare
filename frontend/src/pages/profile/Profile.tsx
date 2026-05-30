@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import './Profile.scss';
+import { Badge, Button, Card } from '../../components/UI';
 
 export function Profile() {
     const navigate = useNavigate();
@@ -21,13 +22,15 @@ export function Profile() {
 
     return (
         <div className="profile-page">
-            <section className="profile-card">
+            <Card className="profile-card">
                 <div className="profile-header">
                     <div className="profile-avatar">{user.initials}</div>
 
                     <div>
                         <h2>{user.name}</h2>
-                        <span className="profile-role-badge">{user.role}</span>
+                        <Badge className="profile-role-badge" tone="primary">
+                            {user.role}
+                        </Badge>
                     </div>
                 </div>
 
@@ -54,12 +57,16 @@ export function Profile() {
                 </div>
 
                 <div className="profile-footer">
-                    <button type="button" onClick={handleLogout}>
-                        <LogOut size={18} />
+                    <Button
+                        icon={<LogOut size={18} />}
+                        onClick={handleLogout}
+                        type="button"
+                        variant="danger"
+                    >
                         Sair
-                    </button>
+                    </Button>
                 </div>
-            </section>
+            </Card>
         </div>
     );
 }

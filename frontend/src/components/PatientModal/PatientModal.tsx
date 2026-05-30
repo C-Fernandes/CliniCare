@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import './PatientModal.scss';
-import { Button, FormField, Modal } from '../ui';
+import { Button, FormField, Modal } from '../UI';
 import type { PatientFormData, PatientStatus } from '../../types/patient';
 
 interface PatientModalProps {

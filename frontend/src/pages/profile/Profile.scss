@@ -5,105 +5,73 @@
 .profile-card {
   width: 100%;
   max-width: 760px;
-  background: #ffffff;
-  border: 1px solid #dce4ec;
-  border-radius: 18px;
-  padding: 2rem;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+  padding: var(--space-8);
 }
 
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 2.3rem;
+  gap: var(--space-6);
+  margin-bottom: 2rem;
 
   h2 {
-    margin: 0 0 0.5rem;
-    color: #0f172a;
-    font-size: 1.4rem;
+    margin: 0 0 var(--space-3);
+    color: var(--color-text);
+    font-size: var(--font-2xl);
   }
 }
 
 .profile-avatar {
-  width: 76px;
-  height: 76px;
+  width: 68px;
+  height: 68px;
   border-radius: 999px;
-  background: #087bd3;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: var(--font-2xl);
   font-weight: 800;
   flex-shrink: 0;
 }
 
 .profile-role-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-  background: #e8f3fd;
-  color: #087bd3;
-  border: 1px solid #b8dafa;
-  font-size: 0.8rem;
-  font-weight: 700;
+  width: fit-content;
 }
 
 .profile-info {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.7rem 5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #dce4ec;
+  gap: var(--space-7) 4rem;
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .profile-info__item {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--space-1);
 
   span {
-    color: #64748b;
-    font-size: 0.95rem;
+    color: var(--color-muted);
+    font-size: var(--font-md);
   }
 
   strong {
-    color: #0f172a;
-    font-size: 1rem;
+    color: var(--color-text);
+    font-size: var(--font-base);
   }
 }
 
 .profile-footer {
   display: flex;
   justify-content: flex-end;
-  padding-top: 1.7rem;
-
-  button {
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid #dce4ec;
-    background: #ffffff;
-    color: #0f172a;
-    padding: 0 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-weight: 700;
-    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
-
-    &:hover {
-      color: #dc2626;
-      border-color: #fecaca;
-      background: #fff5f5;
-    }
-  }
+  padding-top: var(--space-7);
 }
 
 @media (max-width: 700px) {
   .profile-card {
-    padding: 1.4rem;
+    padding: var(--space-7);
   }
 
   .profile-header {
@@ -112,6 +80,6 @@
 
   .profile-info {
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: var(--space-6);
   }
 }

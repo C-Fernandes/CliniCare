@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Card } from '../../ui';
+import { Card } from '../../UI';
 
 interface DashboardPanelProps {
     children: ReactNode;

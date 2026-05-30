@@ -1,18 +1,21 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 import './Card.scss';
 
-interface CardProps extends HTMLAttributes<HTMLElement> {
+type CardProps<T extends ElementType = 'section'> = {
+    as?: T;
     children: ReactNode;
-    as?: 'article' | 'section' | 'div';
-}
+    className?: string;
+} & Omit<ComponentPropsWithoutRef<T>, 'as' | 'children' | 'className'>;
 
-export function Card({
-    as: Component = 'section',
+export function Card<T extends ElementType = 'section'>({
+    as,
     children,
     className = '',
     ...props
-}: CardProps) {
+}: CardProps<T>) {
+    const Component = as ?? 'section';
+
     return (
         <Component className={`card ${className}`.trim()} {...props}>
             {children}

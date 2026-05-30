@@ -4,7 +4,7 @@ import { Pencil, Plus, Power } from 'lucide-react';
 
 import './Users.scss';
 import { UserModal, type UserFormData, type UserRole } from '../../components/UserModal/UserModal';
-import { Badge, Button, DataTable, IconButton } from '../../components/ui';
+import { Badge, Button, DataTable, IconButton } from '../../components/UI';
 
 interface User {
     id: number;

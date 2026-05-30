@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
 
 import './Notifications.scss';
-import { Badge, Button, Card } from '../../components/ui';
+import { Badge, Button, Card } from '../../components/UI';
 
 type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
