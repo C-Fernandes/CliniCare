@@ -1,96 +1,19 @@
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Pencil, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import './PatientDetails.scss';
 import { Badge, Button, Card } from '../../components/UI';
-
-type PatientStatus =
-    | 'IN_FOLLOW_UP'
-    | 'URGENT'
-    | 'DISCHARGED'
-    | 'PAUSED';
-
-type AttentionLevel = 'LOW' | 'MEDIUM' | 'HIGH';
-
-interface Patient {
-    id: number;
-    name: string;
-    cpf: string;
-    birthDate: string;
-    phone: string;
-    email: string;
-    status: PatientStatus;
-    notes: string;
-}
-
-interface ClinicalEvolution {
-    id: number;
-    patientId: number;
-    date: string;
-    professional: string;
-    summary: string;
-    description: string;
-    conduct: string;
-    attentionLevel: AttentionLevel;
-}
-
-const patientsMock: Patient[] = [
-    {
-        id: 1,
-        name: 'Maria Silva',
-        cpf: '123.456.789-00',
-        birthDate: '15/03/1995',
-        phone: '(84) 99999-9999',
-        email: 'maria@email.com',
-        status: 'IN_FOLLOW_UP',
-        notes: 'Paciente em acompanhamento semanal.',
-    },
-    {
-        id: 2,
-        name: 'João Pereira',
-        cpf: '987.654.321-00',
-        birthDate: '22/07/1988',
-        phone: '(11) 98888-7777',
-        email: 'joao.pereira@email.com',
-        status: 'URGENT',
-        notes: 'Quadro depressivo agudo, requer atenção contínua.',
-    },
-    {
-        id: 3,
-        name: 'Beatriz Almeida',
-        cpf: '456.789.123-00',
-        birthDate: '04/11/2001',
-        phone: '(21) 97777-6666',
-        email: 'bia.almeida@email.com',
-        status: 'DISCHARGED',
-        notes: 'Paciente recebeu alta.',
-    },
-];
-
-const evolutionsMock: ClinicalEvolution[] = [
-    {
-        id: 1,
-        patientId: 2,
-        date: '25/05/2026',
-        professional: 'Dr. Pedro Henrique',
-        summary: 'Piora do quadro depressivo com ideação passiva.',
-        description:
-            'Paciente apresenta piora significativa do quadro depressivo, com ideação passiva. Necessita acompanhamento próximo.',
-        conduct: 'Encaminhamento para psiquiatra e acompanhamento semanal.',
-        attentionLevel: 'HIGH',
-    },
-    {
-        id: 2,
-        patientId: 1,
-        date: '28/05/2026',
-        professional: 'Dra. Ana Costa',
-        summary: 'Melhora parcial dos sintomas ansiosos.',
-        description:
-            'Paciente relatou melhora parcial dos sintomas de ansiedade e maior adesão às orientações.',
-        conduct: 'Manter acompanhamento semanal.',
-        attentionLevel: 'MEDIUM',
-    },
-];
+import { ClinicalEvolutionModal } from '../../components/ClinicalEvolutionModal/ClinicalEvolutionModal';
+import {
+    createClinicalEvolution,
+    getClinicalEvolutionsByPatient,
+} from '../../services/clinicalEvolutions';
+import { getPatientById } from '../../services/patients';
+import type { ClinicalEvolution, AttentionLevel } from '../../types/clinicalEvolution';
+import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
+import type { Patient, PatientStatus } from '../../types/patient';
+import { formatDate, formatDateTime } from '../../utils/formatters';
 
 const statusLabels: Record<PatientStatus, string> = {
     IN_FOLLOW_UP: 'Em acompanhamento',
@@ -121,16 +44,46 @@ const attentionTones: Record<AttentionLevel, 'success' | 'warning' | 'danger'> =
 export function PatientDetails() {
     const navigate = useNavigate();
     const { id } = useParams();
-
     const patientId = Number(id);
+    const [patient, setPatient] = useState<Patient | null>(null);
+    const [patientEvolutions, setPatientEvolutions] = useState<ClinicalEvolution[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [isEvolutionModalOpen, setIsEvolutionModalOpen] = useState(false);
 
-    const patient = patientsMock.find((item) => item.id === patientId);
+    useEffect(() => {
+        async function loadPatientDetails() {
+            try {
+                setIsLoading(true);
+                setError('');
 
-    const patientEvolutions = evolutionsMock.filter(
-        (evolution) => evolution.patientId === patientId
-    );
+                const [patientResponse, evolutionsResponse] = await Promise.all([
+                    getPatientById(patientId),
+                    getClinicalEvolutionsByPatient(patientId),
+                ]);
 
-    if (!patient) {
+                setPatient(patientResponse);
+                setPatientEvolutions(evolutionsResponse.content);
+            } catch {
+                setError('Paciente não encontrado');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        loadPatientDetails();
+    }, [patientId]);
+
+    async function handleCreateEvolution(data: ClinicalEvolutionFormData) {
+        const newEvolution = await createClinicalEvolution({
+            ...data,
+            evolutionDate: new Date(data.evolutionDate).toISOString(),
+        });
+
+        setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
+    }
+
+    if (isLoading || error || !patient) {
         return (
             <div className="patient-details-page">
                 <button
@@ -143,7 +96,7 @@ export function PatientDetails() {
                 </button>
 
                 <Card className="patient-details-card">
-                    <h2>Paciente não encontrado</h2>
+                    <h2>{isLoading ? 'Carregando paciente...' : error || 'Paciente não encontrado'}</h2>
                 </Card>
             </div>
         );
@@ -181,7 +134,7 @@ export function PatientDetails() {
 
                         <div>
                             <span>Data de nascimento</span>
-                            <strong>{patient.birthDate}</strong>
+                            <strong>{formatDate(patient.birthDate)}</strong>
                         </div>
 
                         <div>
@@ -213,6 +166,7 @@ export function PatientDetails() {
                     <Button
                         className="patient-new-evolution-button"
                         icon={<Plus size={18} />}
+                        onClick={() => setIsEvolutionModalOpen(true)}
                     >
                         Nova evolução clínica
                     </Button>
@@ -231,7 +185,7 @@ export function PatientDetails() {
                                 <div className="patient-history-item__card">
                                     <div className="patient-history-item__header">
                                         <strong>
-                                            {evolution.date} · {evolution.professional}
+                                            {formatDateTime(evolution.evolutionDate)} · {evolution.professionalName ?? 'Sem profissional'}
                                         </strong>
 
                                         <Badge
@@ -271,6 +225,14 @@ export function PatientDetails() {
                     </div>
                 )}
             </Card>
+
+            <ClinicalEvolutionModal
+                isOpen={isEvolutionModalOpen}
+                onClose={() => setIsEvolutionModalOpen(false)}
+                onCreateEvolution={handleCreateEvolution}
+                patientId={patient.id}
+                patientName={patient.name}
+            />
         </div>
     );
 }

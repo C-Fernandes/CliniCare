@@ -2,6 +2,7 @@ package com.clinicare.service;
 
 import org.springframework.stereotype.Service;
 
+import com.clinicare.dto.request.LoginRequestDTO;
 import com.clinicare.dto.request.UserRequestDTO;
 import com.clinicare.dto.response.UserResponseDTO;
 import com.clinicare.exception.ResourceNotFoundException;
@@ -63,5 +64,16 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
         User updatedUser = userRepository.save(user);
 
         return userMapper.toResponse(updatedUser);
+    }
+
+    public UserResponseDTO login(LoginRequestDTO request) {
+        User user = userRepository.findByEmailAndActiveTrue(request.email())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para este e-mail."));
+
+        if (!user.getPassword().equals(request.password())) {
+            throw new IllegalArgumentException("E-mail ou senha inválidos.");
+        }
+
+        return userMapper.toResponse(user);
     }
 }

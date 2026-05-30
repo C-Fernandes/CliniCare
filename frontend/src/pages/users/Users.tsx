@@ -1,54 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pencil, Plus, Power } from 'lucide-react';
 
 
 import './Users.scss';
-import { UserModal, type UserFormData, type UserRole } from '../../components/UserModal/UserModal';
+import { UserModal } from '../../components/UserModal/UserModal';
 import { Badge, Button, DataTable, IconButton } from '../../components/UI';
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    role: UserRole;
-    active: boolean;
-    createdAt: string;
-}
-
-const usersMock: User[] = [
-    {
-        id: 1,
-        name: 'Dra. Ana Costa',
-        email: 'ana.costa@clinicare.com',
-        role: 'ADMIN',
-        active: true,
-        createdAt: '10/01/2025',
-    },
-    {
-        id: 2,
-        name: 'Dr. Pedro Henrique',
-        email: 'pedro.henrique@clinicare.com',
-        role: 'PROFESSIONAL',
-        active: true,
-        createdAt: '05/03/2025',
-    },
-    {
-        id: 3,
-        name: 'Dra. Mariana Lopes',
-        email: 'mariana.lopes@clinicare.com',
-        role: 'PROFESSIONAL',
-        active: true,
-        createdAt: '12/04/2025',
-    },
-    {
-        id: 4,
-        name: 'Carlos Mendes',
-        email: 'carlos.mendes@clinicare.com',
-        role: 'PROFESSIONAL',
-        active: false,
-        createdAt: '01/12/2024',
-    },
-];
+import {
+    createUser,
+    deleteUser,
+    getUsers,
+} from '../../services/users';
+import type { User, UserFormData, UserRole } from '../../types/user';
+import { formatDate } from '../../utils/formatters';
 
 const roleLabels: Record<UserRole, string> = {
     ADMIN: 'Administrador',
@@ -61,28 +24,37 @@ const roleTones: Record<UserRole, 'primary' | 'cyan'> = {
 };
 
 export function Users() {
-    const [users, setUsers] = useState<User[]>(usersMock);
+    const [users, setUsers] = useState<User[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    function handleCreateUser(data: UserFormData) {
-        const newUser: User = {
-            id: users.length + 1,
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            active: data.active,
-            createdAt: new Date().toLocaleDateString('pt-BR'),
-        };
+    useEffect(() => {
+        async function loadUsers() {
+            try {
+                setIsLoading(true);
+                setError('');
+                const response = await getUsers();
+                setUsers(response.content);
+            } catch {
+                setError('Não foi possível carregar os usuários.');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        loadUsers();
+    }, []);
+
+    async function handleCreateUser(data: UserFormData) {
+        const newUser = await createUser(data);
 
         setUsers((currentUsers) => [...currentUsers, newUser]);
     }
 
-    function handleToggleActive(id: number) {
-        setUsers((currentUsers) =>
-            currentUsers.map((user) =>
-                user.id === id ? { ...user, active: !user.active } : user
-            )
-        );
+    async function handleDeleteUser(id: number) {
+        await deleteUser(id);
+        setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
     }
 
     return (
@@ -98,7 +70,12 @@ export function Users() {
                 </Button>
             </div>
 
-            <DataTable tableClassName="users-table" wrapperClassName="users-table-card">
+            <DataTable
+                empty={isLoading ? 'Carregando usuários...' : error || 'Nenhum usuário encontrado.'}
+                isEmpty={isLoading || Boolean(error) || users.length === 0}
+                tableClassName="users-table"
+                wrapperClassName="users-table-card"
+            >
                 <thead>
                     <tr>
                         <th>Nome</th>
@@ -138,7 +115,7 @@ export function Users() {
                                 </Badge>
                             </td>
 
-                            <td>{user.createdAt}</td>
+                            <td>{formatDate(user.createdAt)}</td>
 
                             <td>
                                 <div className="users-actions">
@@ -147,8 +124,8 @@ export function Users() {
                                     </IconButton>
 
                                     <IconButton
-                                        label={user.active ? 'Inativar usuário' : 'Ativar usuário'}
-                                        onClick={() => handleToggleActive(user.id)}
+                                        label="Inativar usuário"
+                                        onClick={() => handleDeleteUser(user.id)}
                                     >
                                         <Power size={18} />
                                     </IconButton>

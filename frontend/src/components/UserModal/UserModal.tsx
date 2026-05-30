@@ -2,27 +2,19 @@ import { useState } from 'react';
 
 import './UserModal.scss';
 import { Button, FormField, Modal } from '../UI';
-
-export type UserRole = 'ADMIN' | 'PROFESSIONAL';
-
-export interface UserFormData {
-    name: string;
-    email: string;
-    role: UserRole;
-    active: boolean;
-}
+import type { UserFormData, UserRole } from '../../types/user';
 
 interface UserModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCreateUser: (data: UserFormData) => void;
+    onCreateUser: (data: UserFormData) => Promise<void> | void;
 }
 
 export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [role, setRole] = useState<UserRole>('PROFESSIONAL');
-    const [active, setActive] = useState(true);
 
     if (!isOpen) {
         return null;
@@ -31,18 +23,18 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
     function resetForm() {
         setName('');
         setEmail('');
+        setPassword('');
         setRole('PROFESSIONAL');
-        setActive(true);
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        onCreateUser({
+        await onCreateUser({
             name,
             email,
+            password,
             role,
-            active,
         });
 
         resetForm();
@@ -88,6 +80,17 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
                 />
 
                 <FormField
+                    htmlFor="password"
+                    label="Senha"
+                    controlProps={{
+                        onChange: (event) => setPassword(event.target.value),
+                        required: true,
+                        type: 'password',
+                        value: password,
+                    }}
+                />
+
+                <FormField
                     htmlFor="role"
                     label="Perfil"
                     controlProps={{
@@ -100,22 +103,6 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
                         ),
                         onChange: (event) => setRole(event.target.value as UserRole),
                         value: role,
-                    }}
-                />
-
-                <FormField
-                    htmlFor="status"
-                    label="Status"
-                    controlProps={{
-                        as: 'select',
-                        children: (
-                            <>
-                                <option value="ACTIVE">Ativo</option>
-                                <option value="INACTIVE">Inativo</option>
-                            </>
-                        ),
-                        onChange: (event) => setActive(event.target.value === 'ACTIVE'),
-                        value: active ? 'ACTIVE' : 'INACTIVE',
                     }}
                 />
 

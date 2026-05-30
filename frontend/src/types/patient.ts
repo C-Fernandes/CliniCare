@@ -16,5 +16,7 @@ export interface PatientFormData {
 
 export interface Patient extends PatientFormData {
     id: number;
+    active: boolean;
     createdAt: string;
+    updatedAt: string | null;
 }

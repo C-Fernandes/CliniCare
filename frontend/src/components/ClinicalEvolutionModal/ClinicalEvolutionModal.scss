@@ -1,0 +1,87 @@
+.clinical-evolution-modal {
+  background: var(--color-background);
+}
+
+.clinical-evolution-modal__header {
+  margin-bottom: var(--space-2);
+}
+
+.clinical-evolution-modal__subtitle {
+  margin: 0 0 var(--space-7);
+  color: var(--color-muted-strong);
+  font-size: var(--font-base);
+}
+
+.clinical-evolution-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--space-6);
+}
+
+.clinical-evolution-summary {
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-top: var(--space-3);
+
+  textarea {
+    width: 100%;
+    min-height: 92px;
+    margin-top: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    outline: none;
+    padding: var(--space-4);
+    resize: vertical;
+    box-shadow: var(--shadow-control);
+
+    &:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(8, 123, 211, 0.14);
+    }
+  }
+}
+
+.clinical-evolution-summary__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text);
+  }
+
+  svg {
+    color: var(--color-primary);
+  }
+}
+
+.clinical-evolution-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 700px) {
+  .clinical-evolution-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .clinical-evolution-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .clinical-evolution-summary__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

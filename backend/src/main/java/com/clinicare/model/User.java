@@ -3,8 +3,6 @@ package com.clinicare.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.Notification;
-
 import com.clinicare.enums.UserRole;
 
 import jakarta.persistence.Column;

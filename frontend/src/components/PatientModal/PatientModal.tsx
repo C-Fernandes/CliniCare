@@ -7,7 +7,7 @@ import type { PatientFormData, PatientStatus } from '../../types/patient';
 interface PatientModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCreatePatient: (data: PatientFormData) => void;
+    onCreatePatient: (data: PatientFormData) => Promise<void> | void;
 }
 
 export function PatientModal({
@@ -42,10 +42,10 @@ export function PatientModal({
         onClose();
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        onCreatePatient({
+        await onCreatePatient({
             name,
             cpf,
             birthDate,

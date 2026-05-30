@@ -1,61 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
 
 import './Notifications.scss';
 import { Badge, Button, Card } from '../../components/UI';
-
-type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH';
+import {
+    getNotifications,
+    getNotificationsByPriority,
+    getUnreadNotifications,
+    markNotificationAsRead,
+} from '../../services/notifications';
+import type { Notification, NotificationPriority } from '../../types/notification';
+import { formatDateTime } from '../../utils/formatters';
 
 type NotificationFilter = 'ALL' | 'UNREAD' | 'HIGH';
-
-interface Notification {
-    id: number;
-    title: string;
-    message: string;
-    patientName: string;
-    date: string;
-    priority: NotificationPriority;
-    read: boolean;
-}
-
-const notificationsMock: Notification[] = [
-    {
-        id: 1,
-        title: 'Nova evolução clínica registrada',
-        message: 'Uma nova evolução foi registrada para Maria Silva.',
-        patientName: 'Maria Silva',
-        date: '28/05/2026, 07:30',
-        priority: 'MEDIUM',
-        read: false,
-    },
-    {
-        id: 2,
-        title: 'Evolução de alta prioridade',
-        message: 'Foi registrada uma evolução de alto nível de atenção para João Pereira.',
-        patientName: 'João Pereira',
-        date: '25/05/2026, 12:00',
-        priority: 'HIGH',
-        read: false,
-    },
-    {
-        id: 3,
-        title: 'Paciente sem evolução recente',
-        message: 'Roberto Souza está há mais de 30 dias sem evoluções.',
-        patientName: 'Roberto Souza',
-        date: '22/05/2026, 06:00',
-        priority: 'LOW',
-        read: true,
-    },
-    {
-        id: 4,
-        title: 'Nova evolução clínica registrada',
-        message: 'Uma nova evolução foi registrada para Clara Nogueira.',
-        patientName: 'Clara Nogueira',
-        date: '20/05/2026, 11:00',
-        priority: 'LOW',
-        read: false,
-    },
-];
 
 const priorityLabels: Record<NotificationPriority, string> = {
     LOW: 'Baixa',
@@ -71,27 +28,40 @@ const priorityTones: Record<NotificationPriority, 'neutral' | 'cyan' | 'danger'>
 
 export function Notifications() {
     const [filter, setFilter] = useState<NotificationFilter>('ALL');
-    const [notifications, setNotifications] = useState(notificationsMock);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    const filteredNotifications = useMemo(() => {
-        return notifications.filter((notification) => {
-            if (filter === 'UNREAD') {
-                return !notification.read;
+    useEffect(() => {
+        async function loadNotifications(currentFilter: NotificationFilter) {
+            try {
+                setIsLoading(true);
+                setError('');
+
+                const response =
+                    currentFilter === 'UNREAD'
+                        ? await getUnreadNotifications()
+                        : currentFilter === 'HIGH'
+                            ? await getNotificationsByPriority('HIGH')
+                            : await getNotifications();
+
+                setNotifications(response.content);
+            } catch {
+                setError('Não foi possível carregar as notificações.');
+            } finally {
+                setIsLoading(false);
             }
+        }
 
-            if (filter === 'HIGH') {
-                return notification.priority === 'HIGH';
-            }
+        loadNotifications(filter);
+    }, [filter]);
 
-            return true;
-        });
-    }, [filter, notifications]);
-
-    function handleMarkAsRead(id: number) {
+    async function handleMarkAsRead(id: number) {
+        await markNotificationAsRead(id);
         setNotifications((currentNotifications) =>
             currentNotifications.map((notification) =>
                 notification.id === id
-                    ? { ...notification, read: true }
+                    ? { ...notification, readStatus: true }
                     : notification
             )
         );
@@ -126,16 +96,16 @@ export function Notifications() {
             </section>
 
             <section className="notifications-list">
-                {filteredNotifications.map((notification) => (
+                {notifications.map((notification) => (
                     <article
                         key={notification.id}
-                        className={`notification-card ${!notification.read ? 'notification-card--unread' : ''
+                        className={`notification-card ${!notification.readStatus ? 'notification-card--unread' : ''
                             }`}
                     >
                         <div className="notification-card__content">
                             <div className="notification-card__title">
                                 <span
-                                    className={`notification-card__dot ${notification.read ? 'notification-card__dot--read' : ''
+                                    className={`notification-card__dot ${notification.readStatus ? 'notification-card__dot--read' : ''
                                         }`}
                                 />
 
@@ -154,12 +124,12 @@ export function Notifications() {
                             </p>
 
                             <p className="notification-card__meta">
-                                {notification.patientName} · {notification.date}
+                                {notification.patientName ?? 'Sem paciente'} · {formatDateTime(notification.createdAt)}
                             </p>
                         </div>
 
                         <div className="notification-card__actions">
-                            {!notification.read && (
+                            {!notification.readStatus && (
                                 <Button
                                     type="button"
                                     className="notification-action-button"
@@ -184,9 +154,9 @@ export function Notifications() {
                     </article>
                 ))}
 
-                {filteredNotifications.length === 0 && (
+                {(isLoading || error || notifications.length === 0) && (
                     <Card className="notifications-empty">
-                        Nenhuma notificação encontrada.
+                        {isLoading ? 'Carregando notificações...' : error || 'Nenhuma notificação encontrada.'}
                     </Card>
                 )}
             </section>

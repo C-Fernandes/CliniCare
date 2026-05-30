@@ -81,6 +81,14 @@
   }
 }
 
+.login-error {
+  margin: var(--space-4) 0 0;
+  color: var(--color-danger);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .login-page {
     padding: var(--space-5);

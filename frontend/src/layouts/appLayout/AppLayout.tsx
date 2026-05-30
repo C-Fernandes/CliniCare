@@ -6,6 +6,8 @@ import { Sidebar } from '../../components/Sidebar/Sidebar';
 import './AppLayout.scss';
 
 export function AppLayout() {
+    const user = JSON.parse(localStorage.getItem('clinicare:user') ?? '{}');
+
     return (
         <div className="app-layout">
             <Sidebar />
@@ -26,8 +28,8 @@ export function AppLayout() {
                             </div>
 
                             <div>
-                                <strong>Dra. Ana Costa</strong>
-                                <span>Administrador</span>
+                                <strong>{user.name ?? 'Usuário'}</strong>
+                                <span>{user.role === 'ADMIN' ? 'Administrador' : 'Profissional'}</span>
                             </div>
                         </div>
                     </div>

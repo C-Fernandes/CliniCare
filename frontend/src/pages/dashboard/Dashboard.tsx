@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import {
     Bell,
     ClipboardList,
@@ -10,88 +11,92 @@ import { DashboardPanel } from '../../components/Dashboard/DashboardPanel/Dashbo
 import { EvolutionItem } from '../../components/Dashboard/EvolutionItem/EvolutionItem';
 import { NotificationItem } from '../../components/Dashboard/NotificationItem/NotificationItem';
 import { StatCard } from '../../components/Dashboard/StatCard/StatCard';
+import { getClinicalEvolutions } from '../../services/clinicalEvolutions';
+import { getNotifications } from '../../services/notifications';
+import { getPatients } from '../../services/patients';
+import type { ClinicalEvolution } from '../../types/clinicalEvolution';
+import type { Notification } from '../../types/notification';
+import type { Patient } from '../../types/patient';
+import { formatDateTime } from '../../utils/formatters';
 
-const recentEvolutions = [
-    {
-        patient: 'Maria Silva',
-        date: '28/05/2026',
-        professional: 'Dra. Ana Costa',
-        summary: 'Melhora parcial dos sintomas ansiosos.',
-        attention: 'Médio',
-    },
-    {
-        patient: 'João Pereira',
-        date: '25/05/2026',
-        professional: 'Dr. Pedro Henrique',
-        summary: 'Piora do quadro depressivo com ideação passiva.',
-        attention: 'Alto',
-    },
-    {
-        patient: 'Clara Nogueira',
-        date: '20/05/2026',
-        professional: 'Dra. Mariana Lopes',
-        summary: 'Início de acompanhamento por estresse ocupacional.',
-        attention: 'Baixo',
-    },
-    {
-        patient: 'Maria Silva',
-        date: '14/05/2026',
-        professional: 'Dra. Ana Costa',
-        summary: 'Boa adesão ao tratamento.',
-        attention: 'Baixo',
-    },
-];
+const attentionLabels = {
+    LOW: 'Baixo',
+    MEDIUM: 'Médio',
+    HIGH: 'Alto',
+} as const;
 
-const recentNotifications = [
-    {
-        title: 'Nova evolução clínica registrada',
-        patient: 'Maria Silva',
-        date: '28/05/2026, 07:30',
-        priority: 'Média',
-    },
-    {
-        title: 'Evolução de alta prioridade',
-        patient: 'João Pereira',
-        date: '25/05/2026, 12:00',
-        priority: 'Alta',
-    },
-    {
-        title: 'Paciente sem evolução recente',
-        patient: 'Roberto Souza',
-        date: '22/05/2026, 06:00',
-        priority: 'Baixa',
-    },
-    {
-        title: 'Nova evolução clínica registrada',
-        patient: 'Clara Nogueira',
-        date: '20/05/2026, 11:00',
-        priority: 'Baixa',
-    },
-];
+const priorityLabels = {
+    LOW: 'Baixa',
+    MEDIUM: 'Média',
+    HIGH: 'Alta',
+} as const;
 
 export function Dashboard() {
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [evolutions, setEvolutions] = useState<ClinicalEvolution[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    useEffect(() => {
+        async function loadDashboard() {
+            const [patientsResponse, evolutionsResponse, notificationsResponse] = await Promise.all([
+                getPatients(),
+                getClinicalEvolutions(),
+                getNotifications(),
+            ]);
+
+            setPatients(patientsResponse.content);
+            setEvolutions(evolutionsResponse.content);
+            setNotifications(notificationsResponse.content);
+        }
+
+        loadDashboard();
+    }, []);
+
+    const activePatients = useMemo(
+        () => patients.filter((patient) => patient.active && patient.status === 'IN_FOLLOW_UP').length,
+        [patients]
+    );
+
+    const unreadNotifications = useMemo(
+        () => notifications.filter((notification) => !notification.readStatus).length,
+        [notifications]
+    );
+
     return (
         <div className="dashboard">
             <section className="dashboard__cards">
-                <StatCard icon={<UsersRound size={22} />} label="Total de pacientes" tone="blue" value="5" />
-                <StatCard icon={<UserCheck size={22} />} label="Pacientes ativos" tone="green" value="3" />
-                <StatCard icon={<ClipboardList size={22} />} label="Evoluções no mês" tone="cyan" value="4" />
-                <StatCard icon={<Bell size={22} />} label="Notificações não lidas" tone="red" value="3" />
+                <StatCard icon={<UsersRound size={22} />} label="Total de pacientes" tone="blue" value={String(patients.length)} />
+                <StatCard icon={<UserCheck size={22} />} label="Pacientes ativos" tone="green" value={String(activePatients)} />
+                <StatCard icon={<ClipboardList size={22} />} label="Evoluções no mês" tone="cyan" value={String(evolutions.length)} />
+                <StatCard icon={<Bell size={22} />} label="Notificações não lidas" tone="red" value={String(unreadNotifications)} />
             </section>
 
             <section className="dashboard__content">
                 <DashboardPanel title="Últimas evoluções clínicas">
                     <div className="evolution-list">
-                        {recentEvolutions.map((evolution, index) => (
-                            <EvolutionItem key={`${evolution.patient}-${index}`} {...evolution} />
+                        {evolutions.slice(0, 4).map((evolution) => (
+                            <EvolutionItem
+                                attention={attentionLabels[evolution.attentionLevel]}
+                                date={formatDateTime(evolution.evolutionDate)}
+                                key={evolution.id}
+                                patient={evolution.patientName}
+                                professional={evolution.professionalName ?? 'Sem profissional'}
+                                summary={evolution.summary || evolution.description}
+                            />
                         ))}
                     </div>
                 </DashboardPanel>
 
                 <DashboardPanel title="Notificações recentes">
                     <div className="notification-list">
-                        {recentNotifications.map((notification, index) => (
-                            <NotificationItem key={`${notification.title}-${index}`} {...notification} />
+                        {notifications.slice(0, 4).map((notification) => (
+                            <NotificationItem
+                                date={formatDateTime(notification.createdAt)}
+                                key={notification.id}
+                                patient={notification.patientName ?? 'Sem paciente'}
+                                priority={priorityLabels[notification.priority]}
+                                title={notification.title}
+                            />
                         ))}
                     </div>
                 </DashboardPanel>
