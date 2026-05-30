@@ -12,8 +12,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.management.Notification;
-
 import com.clinicare.enums.PatientStatus;
 
 @Entity

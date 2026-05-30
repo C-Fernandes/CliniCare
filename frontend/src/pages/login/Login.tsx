@@ -72,14 +72,7 @@ export function Login() {
 
                     {error && <p className="login-error">{error}</p>}
 
-                    <div className="login-demo">
-                        <p>
-                            Demo: <strong>ana.costa@clinicare.com</strong> (admin)
-                        </p>
-                        <p>
-                            <strong>pedro.henrique@clinicare.com</strong> (profissional)
-                        </p>
-                    </div>
+
                 </Card>
             </section>
         </main>
