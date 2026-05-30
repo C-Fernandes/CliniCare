@@ -1,0 +1,16 @@
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.users-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.users-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}

@@ -1,0 +1,16 @@
+.icon-button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+}
