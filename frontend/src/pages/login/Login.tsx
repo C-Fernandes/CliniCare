@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 
 import './Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { useAuth } from '../../hooks/useAuth';
+import { getApiError } from '../../services/api';
 
 export function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const [email, setEmail] = useState('ana.costa@clinicare.com');
-    const [password, setPassword] = useState('123456');
+    const [email, setEmail] = useState('admin@clinicare.local');
+    const [password, setPassword] = useState('admin123');
     const [error, setError] = useState('');
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -21,8 +22,8 @@ export function Login() {
             setError('');
             await login({ email, password });
             navigate('/dashboard');
-        } catch {
-            setError('E-mail ou senha inválidos.');
+        } catch (requestError) {
+            setError(getApiError(requestError, 'E-mail ou senha inválidos.'));
         }
     }
 
@@ -72,7 +73,10 @@ export function Login() {
 
                     {error && <p className="login-error">{error}</p>}
 
-
+                    <div className="login-links">
+                        <Link to="/forgot-password">Esqueci minha senha</Link>
+                        <span>Não possui uma conta? <Link to="/register">Criar conta</Link></span>
+                    </div>
                 </Card>
             </section>
         </main>

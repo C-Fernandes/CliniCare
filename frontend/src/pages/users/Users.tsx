@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Plus, Power } from 'lucide-react';
+import { Check, Pencil, Plus, Power, X } from 'lucide-react';
 
 
 import './Users.scss';
@@ -9,9 +9,11 @@ import {
     createUser,
     deleteUser,
     getUsers,
+    approveUser,
+    rejectUser,
     updateUser,
 } from '../../services/users';
-import type { User, UserFormData, UserRole } from '../../types/user';
+import type { User, UserApprovalStatus, UserFormData, UserRole } from '../../types/user';
 import { formatDate } from '../../utils/formatters';
 
 const roleLabels: Record<UserRole, string> = {
@@ -22,6 +24,18 @@ const roleLabels: Record<UserRole, string> = {
 const roleTones: Record<UserRole, 'primary' | 'cyan'> = {
     ADMIN: 'primary',
     PROFESSIONAL: 'cyan',
+};
+
+const approvalLabels: Record<UserApprovalStatus, string> = {
+    PENDING: 'Pendente',
+    APPROVED: 'Aprovado',
+    REJECTED: 'Recusado',
+};
+
+const approvalTones: Record<UserApprovalStatus, 'warning' | 'success' | 'danger'> = {
+    PENDING: 'warning',
+    APPROVED: 'success',
+    REJECTED: 'danger',
 };
 
 export function Users() {
@@ -81,6 +95,13 @@ export function Users() {
         setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
     }
 
+    async function handleApproval(id: number, approve: boolean) {
+        const updatedUser = approve ? await approveUser(id) : await rejectUser(id);
+        setUsers((currentUsers) =>
+            currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
+        );
+    }
+
     return (
         <div className="users-page">
             <div className="users-header">
@@ -105,6 +126,7 @@ export function Users() {
                         <th>Nome</th>
                         <th>Email</th>
                         <th>Perfil</th>
+                        <th>Aprovação</th>
                         <th>Status</th>
                         <th>Criado em</th>
                         <th>Ações</th>
@@ -130,6 +152,12 @@ export function Users() {
                             </td>
 
                             <td>
+                                <Badge tone={approvalTones[user.approvalStatus]}>
+                                    {approvalLabels[user.approvalStatus]}
+                                </Badge>
+                            </td>
+
+                            <td>
                                 <Badge
                                     className={`user-status ${user.active ? 'user-status--active' : 'user-status--inactive'
                                         }`}
@@ -143,6 +171,16 @@ export function Users() {
 
                             <td>
                                 <div className="users-actions">
+                                    {user.approvalStatus === 'PENDING' && (
+                                        <>
+                                            <IconButton label="Aprovar usuário" onClick={() => handleApproval(user.id, true)}>
+                                                <Check size={18} />
+                                            </IconButton>
+                                            <IconButton label="Recusar usuário" onClick={() => handleApproval(user.id, false)}>
+                                                <X size={18} />
+                                            </IconButton>
+                                        </>
+                                    )}
                                     <IconButton
                                         label="Editar usuário"
                                         onClick={() => openEditUserModal(user)}

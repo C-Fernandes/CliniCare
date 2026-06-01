@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.clinicare.enums.UserRole;
+import com.clinicare.enums.UserApprovalStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    private UserApprovalStatus approvalStatus = UserApprovalStatus.APPROVED;
 
     @OneToMany(mappedBy = "professional")
     private List<ClinicalEvolution> clinicalEvolutions = new ArrayList<>();
@@ -74,6 +78,18 @@ public class User extends BaseEntity {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public UserApprovalStatus getApprovalStatus() {
+        return approvalStatus == null ? UserApprovalStatus.APPROVED : approvalStatus;
+    }
+
+    public void setApprovalStatus(UserApprovalStatus approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public boolean isApproved() {
+        return getApprovalStatus() == UserApprovalStatus.APPROVED;
     }
 
     public List<ClinicalEvolution> getClinicalEvolutions() {

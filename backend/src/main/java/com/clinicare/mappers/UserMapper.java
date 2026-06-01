@@ -28,6 +28,7 @@ public class UserMapper implements GenericMapper<User, UserRequestDTO, UserRespo
                 entity.getName(),
                 entity.getEmail(),
                 entity.getRole(),
+                entity.getApprovalStatus(),
                 entity.isActive(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());

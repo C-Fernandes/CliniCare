@@ -34,3 +34,9 @@ api.interceptors.response.use(
 export function unwrapResponse<T>(response: { data: ApiResponse<T> }) {
     return response.data.data;
 }
+
+export function getApiError(error: unknown, fallback: string) {
+    return axios.isAxiosError<ApiResponse<unknown>>(error)
+        ? error.response?.data.error ?? fallback
+        : fallback;
+}

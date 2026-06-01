@@ -82,10 +82,10 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
 
                 <FormField
                     htmlFor="password"
-                    label="Senha"
+                    label={user ? 'Nova senha (opcional)' : 'Senha'}
                     controlProps={{
                         onChange: (event) => setPassword(event.target.value),
-                        required: true,
+                        required: !user,
                         type: 'password',
                         value: password,
                     }}

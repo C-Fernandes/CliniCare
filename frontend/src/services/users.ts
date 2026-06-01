@@ -21,3 +21,11 @@ export async function updateUser(id: number, data: UserFormData) {
 export async function deleteUser(id: number) {
     await api.delete(`/users/${id}`);
 }
+
+export async function approveUser(id: number) {
+    return unwrapResponse(await api.patch<ApiResponse<User>>(`/users/${id}/approve`));
+}
+
+export async function rejectUser(id: number) {
+    return unwrapResponse(await api.patch<ApiResponse<User>>(`/users/${id}/reject`));
+}

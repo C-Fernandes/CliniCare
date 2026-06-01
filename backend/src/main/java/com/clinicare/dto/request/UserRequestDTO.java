@@ -13,7 +13,7 @@ public record UserRequestDTO(
 
                 @NotBlank(message = "O e-mail é obrigatório.") @Email(message = "Informe um e-mail válido.") String email,
 
-                @NotBlank(message = "A senha é obrigatória.") String password,
+                String password,
 
                 @NotNull(message = "O perfil do usuário é obrigatório.") UserRole role
 

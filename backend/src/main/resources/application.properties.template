@@ -1,8 +1,8 @@
 spring.application.name=clinicare
 
-spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/clinicare}
-spring.datasource.username=${SPRING_DATASOURCE_USERNAME:postgres}
-spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:postgres}
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/clinicare}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:clinicare}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:clinicare}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 spring.jpa.hibernate.ddl-auto=${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
@@ -13,8 +13,19 @@ spring.jpa.open-in-view=false
 security.jwt.secret=${SECURITY_JWT_SECRET:change-this-local-jwt-secret-with-at-least-32-characters}
 security.jwt.expiration-minutes=${SECURITY_JWT_EXPIRATION_MINUTES:120}
 
-ai.api.key=${AI_API_KEY:}
-ai.api.url=${AI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}
+ai.api.key=${GEMINI_API_KEY:${AI_API_KEY:}}
+ai.api.url=${GEMINI_API_URL:${AI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent}}
+
+spring.mail.host=${SPRING_MAIL_HOST:localhost}
+spring.mail.port=${SPRING_MAIL_PORT:1025}
+spring.mail.username=${SPRING_MAIL_USERNAME:}
+spring.mail.password=${SPRING_MAIL_PASSWORD:}
+spring.mail.properties.mail.smtp.auth=${SPRING_MAIL_SMTP_AUTH:false}
+spring.mail.properties.mail.smtp.starttls.enable=${SPRING_MAIL_STARTTLS_ENABLE:false}
+
+clinicare.mail.from=${CLINICARE_MAIL_FROM:no-reply@clinicare.local}
+clinicare.app.base-url=${CLINICARE_APP_BASE_URL:http://localhost:3000}
+clinicare.password-reset.expiration-minutes=${CLINICARE_PASSWORD_RESET_EXPIRATION_MINUTES:30}
 
 clinicare.bootstrap.admin.enabled=${CLINICARE_BOOTSTRAP_ADMIN_ENABLED:true}
 clinicare.bootstrap.admin.name=${CLINICARE_BOOTSTRAP_ADMIN_NAME:Administrador}

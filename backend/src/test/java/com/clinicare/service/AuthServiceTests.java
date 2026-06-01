@@ -1,7 +1,9 @@
 package com.clinicare.service;
 
 import com.clinicare.dto.request.LoginRequestDTO;
+import com.clinicare.dto.request.RegisterRequestDTO;
 import com.clinicare.dto.response.LoginResponseDTO;
+import com.clinicare.enums.UserApprovalStatus;
 import com.clinicare.enums.UserRole;
 import com.clinicare.model.User;
 import com.clinicare.repository.UserRepository;
@@ -15,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +67,28 @@ class AuthServiceTests {
 
         assertEquals("$2a$encoded", user.getPassword());
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void loginRejectsPendingAccount() {
+        User user = createUser("$2a$encoded");
+        user.setApprovalStatus(UserApprovalStatus.PENDING);
+        LoginRequestDTO request = new LoginRequestDTO(user.getEmail(), "password");
+
+        when(userRepository.findByEmailAndActiveTrue(user.getEmail())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(request.password(), user.getPassword())).thenReturn(true);
+
+        assertThrows(RuntimeException.class, () -> authService.login(request));
+    }
+
+    @Test
+    void registerCreatesPendingProfessionalWithEncodedPassword() {
+        RegisterRequestDTO request = new RegisterRequestDTO("Profissional", "new@clinicare.local", "password");
+        when(passwordEncoder.encode(request.password())).thenReturn("$2a$encoded");
+
+        authService.register(request);
+
+        verify(userRepository).save(any(User.class));
     }
 
     private User createUser(String password) {

@@ -1,6 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Login } from '../pages/login/Login';
+import { Register } from '../pages/register/Register';
+import { ForgotPassword } from '../pages/forgotPassword/ForgotPassword';
+import { ResetPassword } from '../pages/resetPassword/ResetPassword';
 import { AppLayout } from '../layouts/appLayout/AppLayout';
 import { Dashboard } from '../pages/dashboard/Dashboard';
 import { Patients } from '../pages/patients/Patients';
@@ -18,6 +21,9 @@ export function AppRoutes() {
 
                 <Route element={<RouteGuard publicOnly />}>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                 </Route>
 
                 <Route element={<RouteGuard />}>

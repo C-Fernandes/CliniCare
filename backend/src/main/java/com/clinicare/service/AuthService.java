@@ -2,6 +2,9 @@ package com.clinicare.service;
 
 import com.clinicare.dto.response.LoginResponseDTO;
 import com.clinicare.dto.request.LoginRequestDTO;
+import com.clinicare.dto.request.RegisterRequestDTO;
+import com.clinicare.enums.UserApprovalStatus;
+import com.clinicare.enums.UserRole;
 import com.clinicare.model.User;
 import com.clinicare.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -40,6 +43,10 @@ public class AuthService {
             throw new BadCredentialsException("E-mail ou senha inválidos.");
         }
 
+        if (!user.isApproved()) {
+            throw new BadCredentialsException("Conta aguardando aprovação do administrador.");
+        }
+
         String token = jwtService.generateToken(user);
 
         return new LoginResponseDTO(
@@ -48,5 +55,17 @@ public class AuthService {
                 user.getName(),
                 user.getEmail(),
                 user.getRole());
+    }
+
+    public void register(RegisterRequestDTO request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("Já existe uma conta cadastrada com este e-mail.");
+        }
+
+        User user = new User(request.name(), request.email(), passwordEncoder.encode(request.password()),
+                UserRole.PROFESSIONAL);
+        user.setApprovalStatus(UserApprovalStatus.PENDING);
+        user.setActive(true);
+        userRepository.save(user);
     }
 }

@@ -12,7 +12,9 @@ PostgreSQL.
 - Classificação das evoluções por nível de atenção.
 - Criação assíncrona de notificações ao registrar uma evolução.
 - Listagem e marcação de notificações como lidas.
-- Cadastro de usuários com acesso restrito ao perfil administrador.
+- Registro público de profissionais com aprovação pelo administrador.
+- Recuperação de senha por token temporário enviado por e-mail.
+- Aprovação ou recusa de contas diretamente na listagem de usuários.
 - Interface com dashboard, pacientes, notificações, usuários e perfil.
 - Autenticação JWT com autorização por perfil e senhas criptografadas.
 - Geração opcional de resumo clínico e sugestão de atenção com IA.
@@ -24,7 +26,7 @@ PostgreSQL.
 | Frontend | React 19, TypeScript, Vite, React Router, Axios, Sass |
 | Backend | Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring Security |
 | Banco de dados | PostgreSQL |
-| Infraestrutura local | Docker, Docker Compose, Nginx |
+| Infraestrutura local | Docker, Docker Compose, Nginx, Mailpit |
 | Integração externa | API Gemini para apoio à análise de evoluções clínicas |
 
 ## Arquitetura
@@ -44,10 +46,12 @@ flowchart LR
     admin["Administrador<br/>Gerencia usuários e também<br/>utiliza os recursos clínicos"]
     system["CliniCare<br/>Sistema de acompanhamento clínico"]
     gemini["API Gemini<br/>Serviço externo de IA generativa"]
+    email["Servidor SMTP<br/>Envio de e-mails transacionais"]
 
     professional -->|"Usa"| system
     admin -->|"Administra e usa"| system
     system -->|"Solicita apoio para resumir<br/>e classificar evoluções"| gemini
+    system -->|"Envia aprovação e<br/>redefinição de senha"| email
 ```
 
 ### Nível 2: Contêineres
@@ -59,11 +63,13 @@ flowchart LR
     backend["API REST<br/>Spring Boot + Spring Security<br/>Regras de negócio e autenticação"]
     database[("Banco de dados<br/>PostgreSQL")]
     gemini["API Gemini<br/>IA generativa"]
+    smtp["Servidor SMTP<br/>Mailpit local ou provedor externo"]
 
     user -->|"Acessa pelo navegador"| frontend
     frontend -->|"JSON / HTTP<br/>Bearer JWT"| backend
     backend -->|"JPA / JDBC"| database
     backend -->|"HTTPS / JSON"| gemini
+    backend -->|"SMTP"| smtp
 ```
 
 ### Nível 3: Componentes do Backend
@@ -132,8 +138,8 @@ implementação no futuro.
   histórico em vez de remover registros imediatamente.
 - **Notificações assíncronas:** `@Async` permite criar a notificação após uma
   evolução sem manter a requisição principal aguardando essa persistência.
-- **Docker Compose:** simplifica a execução coordenada de frontend, backend e
-  PostgreSQL no ambiente local.
+- **Docker Compose:** simplifica a execução coordenada de frontend, backend,
+  PostgreSQL e Mailpit no ambiente local.
 - **Mermaid para os diagramas C4:** mantém a documentação versionada junto ao
   código e renderizável diretamente no GitHub.
 
@@ -144,7 +150,7 @@ implementação no futuro.
 ├── backend/             # API REST Spring Boot
 ├── frontend/            # SPA React servida por Nginx em produção
 ├── .env.example         # Variáveis configuráveis do ambiente Docker
-├── docker-compose.yml   # PostgreSQL, backend e frontend
+├── docker-compose.yml   # PostgreSQL, backend, frontend e Mailpit
 └── README.md
 ```
 
@@ -163,8 +169,8 @@ Crie o arquivo de ambiente e ajuste os valores sensíveis:
 cp .env.example .env
 ```
 
-Preencha `AI_API_KEY` para habilitar a geração de resumos com Gemini. Em
-seguida, suba os três contêineres da aplicação:
+Preencha `GEMINI_API_KEY` para habilitar a geração de resumos com Gemini. Em
+seguida, suba os contêineres da aplicação:
 
 ```bash
 docker compose up --build
@@ -175,9 +181,17 @@ Após a inicialização:
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:8080`
 - PostgreSQL: `localhost:5435`
+- Caixa de e-mails local (Mailpit): `http://localhost:8025`
 
 O Nginx encaminha requisições `/api` para o backend. Em um banco novo, o
-bootstrap cria o administrador definido no arquivo `.env`.
+bootstrap cria somente o administrador definido no arquivo `.env`. Os demais
+dados fictícios não são inseridos automaticamente ao executar o Docker Compose;
+use o seed ou restaure o dump descrito na seção Banco de Demonstração.
+
+O Mailpit recebe os e-mails no ambiente local. Em produção, substitua
+`SPRING_MAIL_HOST`, credenciais SMTP e opções de TLS pelos dados do provedor.
+Por padrão, os e-mails de aprovação e redefinição de senha são enviados por
+`no-reply@clinicare.local` e podem ser visualizados em `http://localhost:8025`.
 
 Credenciais padrão para ambiente local:
 
@@ -186,6 +200,94 @@ Credenciais padrão para ambiente local:
 
 > [!WARNING]
 > Troque o segredo JWT e a senha inicial antes de publicar a aplicação.
+
+### Banco de Demonstração
+
+O diretório `database/` contém uma carga fictícia para demonstração e um dump
+pronto para entrega:
+
+| Arquivo | Finalidade |
+| --- | --- |
+| `database/demo-seed.sql` | Recria os dados demo de forma repetível |
+| `database/clinicare-demo.sql` | Dump PostgreSQL completo e populado |
+
+Para recarregar o cenário de demonstração no ambiente Docker:
+
+```bash
+docker compose exec -T postgres \
+  psql -U clinicare -d clinicare < database/demo-seed.sql
+```
+
+Para restaurar o dump completo em um banco vazio:
+
+```bash
+psql -U clinicare -d clinicare < database/clinicare-demo.sql
+```
+
+O dump contém dados exclusivamente fictícios:
+
+- 3 usuários, incluindo uma conta pendente para validar a aprovação;
+- 12 pacientes;
+- 16 evoluções clínicas;
+- 12 notificações.
+
+Credenciais do cenário demo:
+
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Administrador | `admin@clinicare.local` | `admin123` |
+| Profissional | `profissional@clinicare.local` | `profissional123` |
+| Profissional pendente | `mariana.lopes@clinicare.local` | `profissional123` |
+
+A conta pendente permite validar a aprovação diretamente na listagem de
+usuários. Antes da aprovação, ela não consegue acessar o sistema. Após a
+aprovação, o Mailpit recebe o e-mail transacional correspondente.
+
+### Integração com IA
+
+O formulário de evolução clínica está conectado ao endpoint
+`POST /ai/clinical-evolution/analyze`, que utiliza a API Gemini para gerar um
+resumo e sugerir o nível de atenção. O modelo padrão configurado é o
+`gemini-2.5-flash`.
+
+#### Como configurar a chave Gemini
+
+1. Acesse [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Entre com uma conta Google e aceite os termos, caso solicitado.
+3. Crie uma chave da API Gemini ou use uma chave disponível no projeto.
+4. Na raiz do projeto, crie o arquivo de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+5. Abra `.env` e informe a chave sem aspas:
+
+```dotenv
+GEMINI_API_KEY=sua-chave-gerada-no-google-ai-studio
+```
+
+6. Suba ou reconstrua a aplicação para que o Docker injete a chave no backend:
+
+```bash
+docker compose up --build
+```
+
+O arquivo `docker-compose.yml` envia `GEMINI_API_KEY` somente para o contêiner
+do backend. A chave não é exposta ao frontend e não deve ser versionada.
+
+#### Como usar a análise com Gemini
+
+1. Acesse `http://localhost:3000`.
+2. Entre com uma conta administradora ou profissional aprovada.
+3. Abra `Pacientes` e selecione um paciente.
+4. Inicie o cadastro de uma evolução clínica.
+5. Preencha a descrição e, opcionalmente, a conduta.
+6. Clique em `Gerar resumo com IA`.
+7. Revise o resumo e o nível de atenção sugeridos pelo Gemini antes de salvar.
+
+Sem `GEMINI_API_KEY`, as demais funcionalidades continuam disponíveis, mas a
+análise por IA não responde.
 
 ### Execução Manual
 
@@ -236,6 +338,9 @@ Principais endpoints:
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
 | `POST` | `/auth/login` | Autentica um usuário |
+| `POST` | `/auth/register` | Cria uma conta profissional pendente |
+| `POST` | `/auth/forgot-password` | Solicita redefinição de senha por e-mail |
+| `POST` | `/auth/reset-password` | Redefine a senha com token temporário |
 | `GET`, `POST` | `/patients` | Lista e cadastra pacientes |
 | `GET`, `PUT`, `DELETE` | `/patients/{id}` | Consulta, atualiza e remove logicamente um paciente |
 | `GET` | `/patients/filter/status` | Filtra pacientes por status |
@@ -247,7 +352,17 @@ Principais endpoints:
 | `GET` | `/notifications/unread` | Lista notificações não lidas |
 | `PATCH` | `/notifications/{id}/read` | Marca uma notificação como lida |
 | `GET`, `POST` | `/users` | Lista e cadastra usuários administrativamente |
+| `PATCH` | `/users/{id}/approve` | Aprova uma conta e envia e-mail |
+| `PATCH` | `/users/{id}/reject` | Recusa uma conta |
 | `POST` | `/ai/clinical-evolution/analyze` | Gera resumo e sugestão de atenção com IA |
+
+### Permissões
+
+| Perfil | Acesso |
+| --- | --- |
+| Público | Login, registro e redefinição de senha |
+| Profissional | Pacientes, evoluções clínicas, notificações e apoio da IA |
+| Administrador | Recursos clínicos e gerenciamento completo de usuários |
 
 ## Validação
 
@@ -288,6 +403,8 @@ cd backend
 
 ## Melhorias Futuras
 
-- Adicionar testes do frontend e uma automação de CI.
-- Aumentar a cobertura de testes de integração dos endpoints REST.
-- Adicionar paginação controlada pela interface para bases maiores.
+- Permitir anexar exames e documentos ao histórico de cada paciente.
+- Disponibilizar agenda de retornos com lembretes automáticos.
+- Criar filtros avançados e relatórios gerenciais por período e nível de atenção.
+- Permitir configurar modelos de notificação e preferências de envio.
+- Adicionar trilha de auditoria para alterações em dados clínicos.

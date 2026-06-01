@@ -15,10 +15,10 @@ public class GeminiAiClient implements AiClient {
 
     private final RestClient restClient;
 
-    @Value("${ai.api.key}")
+    @Value("${ai.api.key:${GEMINI_API_KEY:}}")
     private String apiKey;
 
-    @Value("${ai.api.url}")
+    @Value("${ai.api.url:${GEMINI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent}}")
     private String apiUrl;
 
     public GeminiAiClient() {
@@ -27,6 +27,10 @@ public class GeminiAiClient implements AiClient {
 
     @Override
     public String generateClinicalEvolutionAnalysis(String prompt) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("Configure GEMINI_API_KEY para utilizar a análise com IA.");
+        }
+
         Map<String, Object> body = Map.of(
                 "contents", List.of(
                         Map.of(

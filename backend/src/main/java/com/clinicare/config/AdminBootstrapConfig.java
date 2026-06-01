@@ -1,6 +1,7 @@
 package com.clinicare.config;
 
 import com.clinicare.enums.UserRole;
+import com.clinicare.enums.UserApprovalStatus;
 import com.clinicare.model.User;
 import com.clinicare.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ public class AdminBootstrapConfig {
             }
 
             User admin = new User(name, email, passwordEncoder.encode(password), UserRole.ADMIN);
+            admin.setApprovalStatus(UserApprovalStatus.APPROVED);
             admin.setActive(true);
             userRepository.save(admin);
         };
