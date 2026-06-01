@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Pencil, Plus } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, Sparkles } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import './PatientDetails.scss';
@@ -11,6 +11,9 @@ import {
     getClinicalEvolutionsByPatient,
 } from '../../services/clinicalEvolutions';
 import { getPatientById, updatePatient } from '../../services/patients';
+import { getApiError } from '../../services/api';
+import { summarizePatient } from '../../services/patientSummaryAi';
+import type { PatientSummaryAiResponse } from '../../services/patientSummaryAi';
 import type { ClinicalEvolution, AttentionLevel } from '../../types/clinicalEvolution';
 import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
@@ -52,6 +55,9 @@ export function PatientDetails() {
     const [error, setError] = useState('');
     const [isEvolutionModalOpen, setIsEvolutionModalOpen] = useState(false);
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [patientSummary, setPatientSummary] = useState<PatientSummaryAiResponse | null>(null);
+    const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [summaryError, setSummaryError] = useState('');
 
     useEffect(() => {
         async function loadPatientDetails() {
@@ -88,6 +94,18 @@ export function PatientDetails() {
     async function handleUpdatePatient(data: PatientFormData) {
         const updatedPatient = await updatePatient(patientId, data);
         setPatient(updatedPatient);
+    }
+
+    async function handleGenerateSummary() {
+        try {
+            setIsGeneratingSummary(true);
+            setSummaryError('');
+            setPatientSummary(await summarizePatient(patientId));
+        } catch (requestError) {
+            setSummaryError(getApiError(requestError, 'Não foi possível gerar o resumo geral.'));
+        } finally {
+            setIsGeneratingSummary(false);
+        }
     }
 
     if (isLoading || error || !patient) {
@@ -163,6 +181,15 @@ export function PatientDetails() {
 
                 <div className="patient-details-actions">
                     <Button
+                        icon={<Sparkles size={18} />}
+                        variant="secondary"
+                        onClick={handleGenerateSummary}
+                        disabled={isGeneratingSummary}
+                    >
+                        {isGeneratingSummary ? 'Gerando resumo...' : 'Resumo geral com IA'}
+                    </Button>
+
+                    <Button
                         className="patient-edit-button"
                         icon={<Pencil size={18} />}
                         variant="secondary"
@@ -180,6 +207,35 @@ export function PatientDetails() {
                     </Button>
                 </div>
             </Card>
+
+            {(patientSummary || summaryError) && (
+                <Card className="patient-ai-summary-card">
+                    <div className="patient-ai-summary-card__header">
+                        <div>
+                            <h2>Resumo geral com Gemini</h2>
+                            <p>Conteúdo de apoio. Revise as informações antes de tomar decisões clínicas.</p>
+                        </div>
+
+                        {patientSummary && (
+                            <Badge tone={attentionTones[patientSummary.suggestedAttentionLevel]}>
+                                Atenção sugerida: {attentionLabels[patientSummary.suggestedAttentionLevel]}
+                            </Badge>
+                        )}
+                    </div>
+
+                    {summaryError ? (
+                        <p className="patient-ai-summary-card__error">{summaryError}</p>
+                    ) : (
+                        <>
+                            <p>{patientSummary?.summary}</p>
+                            <strong>Justificativa para revisão profissional</strong>
+                            <p>{patientSummary?.justification}</p>
+                        </>
+                    )}
+
+                    <small>Ao gerar este resumo, dados clínicos são enviados à API Gemini.</small>
+                </Card>
+            )}
 
             <Card className="patient-history-card">
                 <h2>Histórico clínico</h2>

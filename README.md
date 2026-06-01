@@ -18,16 +18,17 @@ PostgreSQL.
 - Interface com dashboard, pacientes, notificações, usuários e perfil.
 - Autenticação JWT com autorização por perfil e senhas criptografadas.
 - Geração opcional de resumo clínico e sugestão de atenção com IA.
+- Geração assistida de resumo geral do histórico de um paciente com Gemini.
 
 ## Tecnologias
 
-| Camada | Tecnologias |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite, React Router, Axios, Sass |
-| Backend | Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring Security |
-| Banco de dados | PostgreSQL |
-| Infraestrutura local | Docker, Docker Compose, Nginx, Mailpit |
-| Integração externa | API Gemini para apoio à análise de evoluções clínicas |
+| Camada               | Tecnologias                                                              |
+| -------------------- | ------------------------------------------------------------------------ |
+| Frontend             | React 19, TypeScript, Vite, React Router, Axios, Sass                    |
+| Backend              | Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring Security |
+| Banco de dados       | PostgreSQL                                                               |
+| Infraestrutura local | Docker, Docker Compose, Nginx, Mailpit                                   |
+| Integração externa   | API Gemini para apoio à análise de evoluções clínicas                    |
 
 ## Arquitetura
 
@@ -115,12 +116,12 @@ flowchart LR
 
 O backend segue uma arquitetura em camadas:
 
-| Camada | Responsabilidade |
-| --- | --- |
-| Controller | Receber requisições HTTP e devolver respostas padronizadas |
-| Service | Concentrar regras de negócio e coordenar os casos de uso |
-| Repository | Isolar a persistência com Spring Data JPA |
-| Mapper | Converter entidades em DTOs e evitar exposição direta do modelo |
+| Camada     | Responsabilidade                                                |
+| ---------- | --------------------------------------------------------------- |
+| Controller | Receber requisições HTTP e devolver respostas padronizadas      |
+| Service    | Concentrar regras de negócio e coordenar os casos de uso        |
+| Repository | Isolar a persistência com Spring Data JPA                       |
+| Mapper     | Converter entidades em DTOs e evitar exposição direta do modelo |
 
 Também foi aplicado o padrão **Adapter** na integração com IA. A interface
 `AiClient` define o contrato usado pelo serviço clínico, enquanto
@@ -206,10 +207,10 @@ Credenciais padrão para ambiente local:
 O diretório `database/` contém uma carga fictícia para demonstração e um dump
 pronto para entrega:
 
-| Arquivo | Finalidade |
-| --- | --- |
-| `database/demo-seed.sql` | Recria os dados demo de forma repetível |
-| `database/clinicare-demo.sql` | Dump PostgreSQL completo e populado |
+| Arquivo                       | Finalidade                              |
+| ----------------------------- | --------------------------------------- |
+| `database/demo-seed.sql`      | Recria os dados demo de forma repetível |
+| `database/clinicare-demo.sql` | Dump PostgreSQL completo e populado     |
 
 Para recarregar o cenário de demonstração no ambiente Docker:
 
@@ -233,10 +234,10 @@ O dump contém dados exclusivamente fictícios:
 
 Credenciais do cenário demo:
 
-| Perfil | E-mail | Senha |
-| --- | --- | --- |
-| Administrador | `admin@clinicare.local` | `admin123` |
-| Profissional | `profissional@clinicare.local` | `profissional123` |
+| Perfil                | E-mail                          | Senha             |
+| --------------------- | ------------------------------- | ----------------- |
+| Administrador         | `admin@clinicare.local`         | `admin123`        |
+| Profissional          | `profissional@clinicare.local`  | `profissional123` |
 | Profissional pendente | `mariana.lopes@clinicare.local` | `profissional123` |
 
 A conta pendente permite validar a aprovação diretamente na listagem de
@@ -285,6 +286,10 @@ do backend. A chave não é exposta ao frontend e não deve ser versionada.
 5. Preencha a descrição e, opcionalmente, a conduta.
 6. Clique em `Gerar resumo com IA`.
 7. Revise o resumo e o nível de atenção sugeridos pelo Gemini antes de salvar.
+
+Na página de detalhes do paciente, o botão `Resumo geral com IA` utiliza até
+20 evoluções recentes para gerar uma visão longitudinal do histórico. O
+conteúdo é apenas assistivo e deve ser revisado pelo profissional.
 
 Sem `GEMINI_API_KEY`, as demais funcionalidades continuam disponíveis, mas a
 análise por IA não responde.
@@ -335,34 +340,35 @@ Todas as respostas seguem a estrutura:
 
 Principais endpoints:
 
-| Método | Endpoint | Descrição |
-| --- | --- | --- |
-| `POST` | `/auth/login` | Autentica um usuário |
-| `POST` | `/auth/register` | Cria uma conta profissional pendente |
-| `POST` | `/auth/forgot-password` | Solicita redefinição de senha por e-mail |
-| `POST` | `/auth/reset-password` | Redefine a senha com token temporário |
-| `GET`, `POST` | `/patients` | Lista e cadastra pacientes |
-| `GET`, `PUT`, `DELETE` | `/patients/{id}` | Consulta, atualiza e remove logicamente um paciente |
-| `GET` | `/patients/filter/status` | Filtra pacientes por status |
-| `GET` | `/patients/filter/name` | Busca pacientes por nome |
-| `GET`, `POST` | `/clinical-evolutions` | Lista e registra evoluções |
-| `GET` | `/clinical-evolutions/patient/{patientId}` | Lista evoluções de um paciente |
-| `GET` | `/clinical-evolutions/professional/{professionalId}` | Lista evoluções de um profissional |
-| `GET` | `/notifications` | Lista notificações |
-| `GET` | `/notifications/unread` | Lista notificações não lidas |
-| `PATCH` | `/notifications/{id}/read` | Marca uma notificação como lida |
-| `GET`, `POST` | `/users` | Lista e cadastra usuários administrativamente |
-| `PATCH` | `/users/{id}/approve` | Aprova uma conta e envia e-mail |
-| `PATCH` | `/users/{id}/reject` | Recusa uma conta |
-| `POST` | `/ai/clinical-evolution/analyze` | Gera resumo e sugestão de atenção com IA |
+| Método                 | Endpoint                                             | Descrição                                            |
+| ---------------------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| `POST`                 | `/auth/login`                                        | Autentica um usuário                                 |
+| `POST`                 | `/auth/register`                                     | Cria uma conta profissional pendente                 |
+| `POST`                 | `/auth/forgot-password`                              | Solicita redefinição de senha por e-mail             |
+| `POST`                 | `/auth/reset-password`                               | Redefine a senha com token temporário                |
+| `GET`, `POST`          | `/patients`                                          | Lista e cadastra pacientes                           |
+| `GET`, `PUT`, `DELETE` | `/patients/{id}`                                     | Consulta, atualiza e remove logicamente um paciente  |
+| `GET`                  | `/patients/filter/status`                            | Filtra pacientes por status                          |
+| `GET`                  | `/patients/filter/name`                              | Busca pacientes por nome                             |
+| `GET`, `POST`          | `/clinical-evolutions`                               | Lista e registra evoluções                           |
+| `GET`                  | `/clinical-evolutions/patient/{patientId}`           | Lista evoluções de um paciente                       |
+| `GET`                  | `/clinical-evolutions/professional/{professionalId}` | Lista evoluções de um profissional                   |
+| `GET`                  | `/notifications`                                     | Lista notificações                                   |
+| `GET`                  | `/notifications/unread`                              | Lista notificações não lidas                         |
+| `PATCH`                | `/notifications/{id}/read`                           | Marca uma notificação como lida                      |
+| `GET`, `POST`          | `/users`                                             | Lista e cadastra usuários administrativamente        |
+| `PATCH`                | `/users/{id}/approve`                                | Aprova uma conta e envia e-mail                      |
+| `PATCH`                | `/users/{id}/reject`                                 | Recusa uma conta                                     |
+| `POST`                 | `/ai/clinical-evolution/analyze`                     | Gera resumo e sugestão de atenção com IA             |
+| `POST`                 | `/ai/patients/{id}/summary`                          | Gera resumo geral assistido do histórico do paciente |
 
 ### Permissões
 
-| Perfil | Acesso |
-| --- | --- |
-| Público | Login, registro e redefinição de senha |
-| Profissional | Pacientes, evoluções clínicas, notificações e apoio da IA |
-| Administrador | Recursos clínicos e gerenciamento completo de usuários |
+| Perfil        | Acesso                                                    |
+| ------------- | --------------------------------------------------------- |
+| Público       | Login, registro e redefinição de senha                    |
+| Profissional  | Pacientes, evoluções clínicas, notificações e apoio da IA |
+| Administrador | Recursos clínicos e gerenciamento completo de usuários    |
 
 ## Validação
 
@@ -383,23 +389,19 @@ cd backend
 
 ## Aderência ao Desafio
 
-| Requisito | Estado | Observação |
-| --- | --- | --- |
-| Cadastro e listagem de pacientes | Concluído | Disponível no frontend e no backend |
-| Edição de pacientes | Concluído | Disponível na listagem e nos detalhes |
-| Cadastro de evoluções clínicas | Concluído | Disponível nos detalhes do paciente |
-| Visualização do histórico clínico | Concluído | Disponível nos detalhes do paciente |
-| Notificações assíncronas | Concluído | Implementadas com `@Async` |
-| API REST, React e PostgreSQL | Concluído | Estrutura full stack implementada |
-| Docker Compose | Concluído | Variáveis configuráveis e proxy Nginx incluídos |
-| Aplicação publicada na internet | Pendente | É necessário publicar e adicionar o link |
-| README com documentação | Concluído | Instruções, arquitetura, decisões e melhorias documentadas |
-| Integração com LLM | Concluído | Endpoint Gemini conectado ao formulário de evolução |
-| Documentação C4 Model | Concluído | Contexto, contêineres e componentes documentados |
-
-## Pendência para Entrega
-
-- Publicar a aplicação na internet e adicionar o endereço ao README.
+| Requisito                         | Estado    | Observação                                                 |
+| --------------------------------- | --------- | ---------------------------------------------------------- |
+| Cadastro e listagem de pacientes  | Concluído | Disponível no frontend e no backend                        |
+| Edição de pacientes               | Concluído | Disponível na listagem e nos detalhes                      |
+| Cadastro de evoluções clínicas    | Concluído | Disponível nos detalhes do paciente                        |
+| Visualização do histórico clínico | Concluído | Disponível nos detalhes do paciente                        |
+| Notificações assíncronas          | Concluído | Implementadas com `@Async`                                 |
+| API REST, React e PostgreSQL      | Concluído | Estrutura full stack implementada                          |
+| Docker Compose                    | Concluído | Variáveis configuráveis e proxy Nginx incluídos            |
+| Aplicação publicada na internet   | Pendente  | É necessário publicar e adicionar o link                   |
+| README com documentação           | Concluído | Instruções, arquitetura, decisões e melhorias documentadas |
+| Integração com LLM                | Concluído | Endpoint Gemini conectado ao formulário de evolução        |
+| Documentação C4 Model             | Concluído | Contexto, contêineres e componentes documentados           |
 
 ## Melhorias Futuras
 

@@ -21,7 +21,8 @@
 }
 
 .patient-details-card,
-.patient-history-card {
+.patient-history-card,
+.patient-ai-summary-card {
   padding: var(--space-7);
 }
 
@@ -88,6 +89,44 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+}
+
+.patient-ai-summary-card {
+  border-color: var(--color-primary);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+
+    h2 {
+      margin: 0;
+      color: var(--color-text);
+      font-size: var(--font-lg);
+    }
+
+    p {
+      margin: var(--space-2) 0 0;
+      color: var(--color-muted);
+    }
+  }
+
+  p {
+    color: var(--color-text);
+    line-height: 1.6;
+  }
+
+  small {
+    display: block;
+    margin-top: var(--space-5);
+    color: var(--color-muted);
+  }
+
+  &__error {
+    color: var(--color-danger) !important;
+    font-weight: 700;
+  }
 }
 
 .patient-history-card {
@@ -210,6 +249,10 @@
 
   .patient-details-actions {
     flex-wrap: wrap;
+  }
+
+  .patient-ai-summary-card__header {
+    flex-direction: column;
   }
 }
 

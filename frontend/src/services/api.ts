@@ -25,6 +25,10 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem(AUTH_STORAGE_KEY);
+
+            if (!error.config?.url?.includes('/auth/login')) {
+                window.location.assign('/login');
+            }
         }
 
         return Promise.reject(error);
