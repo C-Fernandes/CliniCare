@@ -7,7 +7,7 @@ import { Badge, Button, DataTable, IconButton } from '../../components/UI';
 
 import './Patients.scss';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
-import { createPatient, getPatients } from '../../services/patients';
+import { createPatient, getPatients, updatePatient } from '../../services/patients';
 import { formatDate } from '../../utils/formatters';
 
 const statusLabels: Record<PatientStatus, string> = {
@@ -29,6 +29,7 @@ export function Patients() {
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<PatientStatus | 'ALL'>('ALL');
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -62,10 +63,34 @@ export function Patients() {
         });
     }, [patients, search, status]);
 
-    async function handleCreatePatient(data: PatientFormData) {
-        const newPatient = await createPatient(data);
+    async function handleSavePatient(data: PatientFormData) {
+        if (selectedPatient) {
+            const updatedPatient = await updatePatient(selectedPatient.id, data);
+            setPatients((currentPatients) =>
+                currentPatients.map((patient) =>
+                    patient.id === updatedPatient.id ? updatedPatient : patient
+                )
+            );
+            return;
+        }
 
+        const newPatient = await createPatient(data);
         setPatients((currentPatients) => [newPatient, ...currentPatients]);
+    }
+
+    function openCreatePatientModal() {
+        setSelectedPatient(null);
+        setIsPatientModalOpen(true);
+    }
+
+    function openEditPatientModal(patient: Patient) {
+        setSelectedPatient(patient);
+        setIsPatientModalOpen(true);
+    }
+
+    function closePatientModal() {
+        setSelectedPatient(null);
+        setIsPatientModalOpen(false);
     }
 
     return (
@@ -99,7 +124,7 @@ export function Patients() {
                     className="patients-new-button"
                     icon={<Plus size={18} />}
                     type="button"
-                    onClick={() => setIsPatientModalOpen(true)}
+                    onClick={openCreatePatientModal}
                 >
                     Novo paciente
                 </Button>
@@ -154,7 +179,10 @@ export function Patients() {
                                         <Eye size={18} />
                                     </IconButton>
 
-                                    <IconButton label="Editar paciente">
+                                    <IconButton
+                                        label="Editar paciente"
+                                        onClick={() => openEditPatientModal(patient)}
+                                    >
                                         <Pencil size={18} />
                                     </IconButton>
                                 </div>
@@ -165,9 +193,11 @@ export function Patients() {
             </DataTable>
 
             <PatientModal
+                key={selectedPatient?.id ?? 'new'}
                 isOpen={isPatientModalOpen}
-                onClose={() => setIsPatientModalOpen(false)}
-                onCreatePatient={handleCreatePatient}
+                onClose={closePatientModal}
+                onSavePatient={handleSavePatient}
+                patient={selectedPatient}
             />
         </div>
     );

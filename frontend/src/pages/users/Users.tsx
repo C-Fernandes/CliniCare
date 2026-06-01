@@ -9,6 +9,7 @@ import {
     createUser,
     deleteUser,
     getUsers,
+    updateUser,
 } from '../../services/users';
 import type { User, UserFormData, UserRole } from '../../types/user';
 import { formatDate } from '../../utils/formatters';
@@ -26,6 +27,7 @@ const roleTones: Record<UserRole, 'primary' | 'cyan'> = {
 export function Users() {
     const [users, setUsers] = useState<User[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -46,10 +48,32 @@ export function Users() {
         loadUsers();
     }, []);
 
-    async function handleCreateUser(data: UserFormData) {
-        const newUser = await createUser(data);
+    async function handleSaveUser(data: UserFormData) {
+        if (selectedUser) {
+            const updatedUser = await updateUser(selectedUser.id, data);
+            setUsers((currentUsers) =>
+                currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
+            );
+            return;
+        }
 
+        const newUser = await createUser(data);
         setUsers((currentUsers) => [...currentUsers, newUser]);
+    }
+
+    function openCreateUserModal() {
+        setSelectedUser(null);
+        setIsModalOpen(true);
+    }
+
+    function openEditUserModal(user: User) {
+        setSelectedUser(user);
+        setIsModalOpen(true);
+    }
+
+    function closeUserModal() {
+        setSelectedUser(null);
+        setIsModalOpen(false);
     }
 
     async function handleDeleteUser(id: number) {
@@ -64,7 +88,7 @@ export function Users() {
                     className="users-new-button"
                     icon={<Plus size={18} />}
                     type="button"
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={openCreateUserModal}
                 >
                     Novo usuário
                 </Button>
@@ -119,7 +143,10 @@ export function Users() {
 
                             <td>
                                 <div className="users-actions">
-                                    <IconButton label="Editar usuário">
+                                    <IconButton
+                                        label="Editar usuário"
+                                        onClick={() => openEditUserModal(user)}
+                                    >
                                         <Pencil size={18} />
                                     </IconButton>
 
@@ -137,9 +164,11 @@ export function Users() {
             </DataTable>
 
             <UserModal
+                key={selectedUser?.id ?? 'new'}
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onCreateUser={handleCreateUser}
+                onClose={closeUserModal}
+                onSaveUser={handleSaveUser}
+                user={selectedUser}
             />
         </div>
     );

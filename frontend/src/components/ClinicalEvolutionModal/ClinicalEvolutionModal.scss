@@ -63,6 +63,12 @@
   }
 }
 
+.clinical-evolution-summary__error {
+  color: var(--color-danger);
+  font-size: var(--font-sm);
+  margin: var(--space-3) 0 0;
+}
+
 .clinical-evolution-modal__actions {
   display: flex;
   justify-content: flex-end;

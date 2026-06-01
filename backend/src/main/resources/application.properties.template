@@ -8,3 +8,15 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.open-in-view=false
+
+security.jwt.secret=${SECURITY_JWT_SECRET:change-this-local-jwt-secret-with-at-least-32-characters}
+security.jwt.expiration-minutes=${SECURITY_JWT_EXPIRATION_MINUTES:120}
+
+ai.api.key=${AI_API_KEY:}
+ai.api.url=${AI_API_URL:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}
+
+clinicare.bootstrap.admin.enabled=${CLINICARE_BOOTSTRAP_ADMIN_ENABLED:true}
+clinicare.bootstrap.admin.name=${CLINICARE_BOOTSTRAP_ADMIN_NAME:Administrador}
+clinicare.bootstrap.admin.email=${CLINICARE_BOOTSTRAP_ADMIN_EMAIL:admin@clinicare.local}
+clinicare.bootstrap.admin.password=${CLINICARE_BOOTSTRAP_ADMIN_PASSWORD:admin123}

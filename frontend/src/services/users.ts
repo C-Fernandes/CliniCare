@@ -14,6 +14,10 @@ export async function createUser(data: UserFormData) {
     return unwrapResponse(await api.post<ApiResponse<User>>('/users', data));
 }
 
+export async function updateUser(id: number, data: UserFormData) {
+    return unwrapResponse(await api.put<ApiResponse<User>>(`/users/${id}`, data));
+}
+
 export async function deleteUser(id: number) {
     await api.delete(`/users/${id}`);
 }

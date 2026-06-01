@@ -2,19 +2,20 @@ import { useState } from 'react';
 
 import './UserModal.scss';
 import { Button, FormField, Modal } from '../UI';
-import type { UserFormData, UserRole } from '../../types/user';
+import type { User, UserFormData, UserRole } from '../../types/user';
 
 interface UserModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCreateUser: (data: UserFormData) => Promise<void> | void;
+    onSaveUser: (data: UserFormData) => Promise<void> | void;
+    user?: User | null;
 }
 
-export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps) {
+    const [name, setName] = useState(user?.name ?? '');
+    const [email, setEmail] = useState(user?.email ?? '');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState<UserRole>('PROFESSIONAL');
+    const [role, setRole] = useState<UserRole>(user?.role ?? 'PROFESSIONAL');
 
     if (!isOpen) {
         return null;
@@ -30,7 +31,7 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        await onCreateUser({
+        await onSaveUser({
             name,
             email,
             password,
@@ -53,7 +54,7 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
             isOpen={isOpen}
             onClose={handleClose}
             overlayClassName="user-modal-overlay"
-            title="Novo usuário"
+            title={user ? 'Editar usuário' : 'Novo usuário'}
         >
             <form onSubmit={handleSubmit}>
                 <FormField
@@ -111,7 +112,7 @@ export function UserModal({ isOpen, onClose, onCreateUser }: UserModalProps) {
                         Cancelar
                     </Button>
 
-                    <Button type="submit">Criar usuário</Button>
+                    <Button type="submit">{user ? 'Salvar usuário' : 'Criar usuário'}</Button>
                 </div>
             </form>
         </Modal>

@@ -1,12 +1,14 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Bell, UserRound } from 'lucide-react';
 
 import { Sidebar } from '../../components/Sidebar/Sidebar';
+import { useAuth } from '../../hooks/useAuth';
 
 import './AppLayout.scss';
 
 export function AppLayout() {
-    const user = JSON.parse(localStorage.getItem('clinicare:user') ?? '{}');
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div className="app-layout">
@@ -17,9 +19,12 @@ export function AppLayout() {
                     <h1>Dashboard</h1>
 
                     <div className="topbar__actions">
-                        <button className="topbar__notification">
+                        <button
+                            className="topbar__notification"
+                            onClick={() => navigate('/notifications')}
+                            type="button"
+                        >
                             <Bell size={20} />
-                            <span>3</span>
                         </button>
 
                         <div className="topbar__user">
@@ -28,8 +33,8 @@ export function AppLayout() {
                             </div>
 
                             <div>
-                                <strong>{user.name ?? 'Usuário'}</strong>
-                                <span>{user.role === 'ADMIN' ? 'Administrador' : 'Profissional'}</span>
+                                <strong>{user?.name ?? 'Usuário'}</strong>
+                                <span>{user?.role === 'ADMIN' ? 'Administrador' : 'Profissional'}</span>
                             </div>
                         </div>
                     </div>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import './Profile.scss';
 import { Badge, Button, Card } from '../../components/UI';
-import { formatDate } from '../../utils/formatters';
+import { useAuth } from '../../hooks/useAuth';
 
 const roleLabels = {
     ADMIN: 'Administrador',
@@ -12,18 +12,9 @@ const roleLabels = {
 
 export function Profile() {
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
-    const user = {
-        name: 'Dra. Ana Costa',
-        initials: 'DA',
-        email: 'ana.costa@clinicare.com',
-        role: 'ADMIN',
-        status: 'Ativo',
-        createdAt: '10/01/2025',
-        ...JSON.parse(localStorage.getItem('clinicare:user') ?? '{}'),
-    };
-
-    const initials = user.name
+    const initials = (user?.name ?? 'Usuário')
         .split(' ')
         .slice(0, 2)
         .map((part: string) => part[0])
@@ -31,6 +22,7 @@ export function Profile() {
         .toUpperCase();
 
     function handleLogout() {
+        logout();
         navigate('/login');
     }
 
@@ -41,9 +33,9 @@ export function Profile() {
                     <div className="profile-avatar">{initials}</div>
 
                     <div>
-                        <h2>{user.name}</h2>
+                        <h2>{user?.name}</h2>
                         <Badge className="profile-role-badge" tone="primary">
-                            {roleLabels[user.role as keyof typeof roleLabels] ?? user.role}
+                            {user ? roleLabels[user.role] : ''}
                         </Badge>
                     </div>
                 </div>
@@ -51,22 +43,17 @@ export function Profile() {
                 <div className="profile-info">
                     <div className="profile-info__item">
                         <span>Email</span>
-                        <strong>{user.email}</strong>
+                        <strong>{user?.email}</strong>
                     </div>
 
                     <div className="profile-info__item">
                         <span>Perfil</span>
-                        <strong>{roleLabels[user.role as keyof typeof roleLabels] ?? user.role}</strong>
-                    </div>
-
-                    <div className="profile-info__item">
-                        <span>Data de criação</span>
-                        <strong>{formatDate(user.createdAt)}</strong>
+                        <strong>{user ? roleLabels[user.role] : ''}</strong>
                     </div>
 
                     <div className="profile-info__item">
                         <span>Status</span>
-                        <strong>{user.status}</strong>
+                        <strong>Ativo</strong>
                     </div>
                 </div>
 

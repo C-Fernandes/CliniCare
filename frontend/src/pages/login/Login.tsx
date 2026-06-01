@@ -4,10 +4,11 @@ import { Stethoscope } from 'lucide-react';
 
 import './Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
-import { login } from '../../services/auth';
+import { useAuth } from '../../hooks/useAuth';
 
 export function Login() {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const [email, setEmail] = useState('ana.costa@clinicare.com');
     const [password, setPassword] = useState('123456');
@@ -18,8 +19,7 @@ export function Login() {
 
         try {
             setError('');
-            const user = await login({ email, password });
-            localStorage.setItem('clinicare:user', JSON.stringify(user));
+            await login({ email, password });
             navigate('/dashboard');
         } catch {
             setError('E-mail ou senha inválidos.');

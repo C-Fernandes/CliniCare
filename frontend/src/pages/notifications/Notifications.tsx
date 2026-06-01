@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import './Notifications.scss';
 import { Badge, Button, Card } from '../../components/UI';
@@ -27,6 +28,7 @@ const priorityTones: Record<NotificationPriority, 'neutral' | 'cyan' | 'danger'>
 };
 
 export function Notifications() {
+    const navigate = useNavigate();
     const [filter, setFilter] = useState<NotificationFilter>('ALL');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +149,8 @@ export function Notifications() {
                                 icon={<ExternalLink size={16} />}
                                 size="sm"
                                 variant="ghost"
+                                disabled={!notification.patientId}
+                                onClick={() => notification.patientId && navigate(`/patients/${notification.patientId}`)}
                             >
                                 Ver paciente
                             </Button>

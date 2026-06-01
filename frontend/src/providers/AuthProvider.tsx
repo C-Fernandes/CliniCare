@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 
-import { login as loginRequest } from '../services/authService';
+import { login as loginRequest } from '../services/auth';
 import type { AuthUser, LoginRequest } from '../types/auth';
 import { AUTH_STORAGE_KEY, AuthContext } from '../contexts/auth-context';
 

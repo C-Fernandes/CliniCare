@@ -1,8 +1,8 @@
 package com.clinicare.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.clinicare.dto.request.LoginRequestDTO;
 import com.clinicare.dto.request.UserRequestDTO;
 import com.clinicare.dto.response.UserResponseDTO;
 import com.clinicare.exception.ResourceNotFoundException;
@@ -17,10 +17,12 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -40,6 +42,7 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
         }
 
         User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.password()));
         user.setActive(true);
 
         User savedUser = userRepository.save(user);
@@ -60,20 +63,10 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
                 });
 
         userMapper.updateEntityFromRequest(request, user);
+        user.setPassword(passwordEncoder.encode(request.password()));
 
         User updatedUser = userRepository.save(user);
 
         return userMapper.toResponse(updatedUser);
-    }
-
-    public UserResponseDTO login(LoginRequestDTO request) {
-        User user = userRepository.findByEmailAndActiveTrue(request.email())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para este e-mail."));
-
-        if (!user.getPassword().equals(request.password())) {
-            throw new IllegalArgumentException("E-mail ou senha inválidos.");
-        }
-
-        return userMapper.toResponse(user);
     }
 }

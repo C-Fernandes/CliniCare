@@ -30,6 +30,15 @@ services:
       SPRING_DATASOURCE_USERNAME: clinicare
       SPRING_DATASOURCE_PASSWORD: clinicare
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:-change-this-local-jwt-secret-with-at-least-32-characters}
+      SECURITY_JWT_EXPIRATION_MINUTES: ${SECURITY_JWT_EXPIRATION_MINUTES:-120}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_API_URL: ${AI_API_URL:-https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}
+      CLINICARE_BOOTSTRAP_ADMIN_ENABLED: ${CLINICARE_BOOTSTRAP_ADMIN_ENABLED:-true}
+      CLINICARE_BOOTSTRAP_ADMIN_NAME: ${CLINICARE_BOOTSTRAP_ADMIN_NAME:-Administrador}
+      CLINICARE_BOOTSTRAP_ADMIN_EMAIL: ${CLINICARE_BOOTSTRAP_ADMIN_EMAIL:-admin@clinicare.local}
+      CLINICARE_BOOTSTRAP_ADMIN_PASSWORD: ${CLINICARE_BOOTSTRAP_ADMIN_PASSWORD:-admin123}
     depends_on:
       postgres:
         condition: service_healthy

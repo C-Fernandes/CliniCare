@@ -1,12 +1,7 @@
 import { api, unwrapResponse } from './api';
 import type { ApiResponse } from '../types/api';
-import type { User } from '../types/user';
+import type { LoginRequest, LoginResponse } from '../types/auth';
 
-export interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-export async function login(credentials: LoginCredentials) {
-    return unwrapResponse(await api.post<ApiResponse<User>>('/auth/login', credentials));
+export async function login(credentials: LoginRequest) {
+    return unwrapResponse(await api.post<ApiResponse<LoginResponse>>('/auth/login', credentials));
 }

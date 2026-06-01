@@ -2,26 +2,28 @@ import { useState } from 'react';
 
 import './PatientModal.scss';
 import { Button, FormField, Modal } from '../UI';
-import type { PatientFormData, PatientStatus } from '../../types/patient';
+import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 
 interface PatientModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCreatePatient: (data: PatientFormData) => Promise<void> | void;
+    onSavePatient: (data: PatientFormData) => Promise<void> | void;
+    patient?: Patient | null;
 }
 
 export function PatientModal({
     isOpen,
     onClose,
-    onCreatePatient,
+    onSavePatient,
+    patient,
 }: PatientModalProps) {
-    const [name, setName] = useState('');
-    const [cpf, setCpf] = useState('');
-    const [birthDate, setBirthDate] = useState('');
-    const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
-    const [status, setStatus] = useState<PatientStatus>('IN_FOLLOW_UP');
-    const [notes, setNotes] = useState('');
+    const [name, setName] = useState(patient?.name ?? '');
+    const [cpf, setCpf] = useState(patient?.cpf ?? '');
+    const [birthDate, setBirthDate] = useState(patient?.birthDate ?? '');
+    const [phone, setPhone] = useState(patient?.phone ?? '');
+    const [email, setEmail] = useState(patient?.email ?? '');
+    const [status, setStatus] = useState<PatientStatus>(patient?.status ?? 'IN_FOLLOW_UP');
+    const [notes, setNotes] = useState(patient?.notes ?? '');
 
     if (!isOpen) {
         return null;
@@ -45,7 +47,7 @@ export function PatientModal({
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        await onCreatePatient({
+        await onSavePatient({
             name,
             cpf,
             birthDate,
@@ -66,7 +68,7 @@ export function PatientModal({
             isOpen={isOpen}
             onClose={handleClose}
             overlayClassName="patient-modal-overlay"
-            title="Novo paciente"
+            title={patient ? 'Editar paciente' : 'Novo paciente'}
             size="lg"
         >
             <form onSubmit={handleSubmit}>

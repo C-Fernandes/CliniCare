@@ -3,7 +3,8 @@ import { Sparkles } from 'lucide-react';
 
 import { Button, FormField, Modal } from '../UI';
 import type { AttentionLevel, ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
-import type { User } from '../../types/user';
+import { analyzeClinicalEvolution } from '../../services/clinicalEvolutionAi';
+import { useAuth } from '../../hooks/useAuth';
 
 import './ClinicalEvolutionModal.scss';
 
@@ -22,12 +23,14 @@ export function ClinicalEvolutionModal({
     patientId,
     patientName,
 }: ClinicalEvolutionModalProps) {
-    const currentUser = JSON.parse(localStorage.getItem('clinicare:user') ?? '{}') as Partial<User>;
+    const { user } = useAuth();
     const [evolutionDate, setEvolutionDate] = useState(new Date().toISOString().slice(0, 10));
     const [summary, setSummary] = useState('');
     const [description, setDescription] = useState('');
     const [conduct, setConduct] = useState('');
     const [attentionLevel, setAttentionLevel] = useState<AttentionLevel>('LOW');
+    const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [aiError, setAiError] = useState('');
 
     function resetForm() {
         setEvolutionDate(new Date().toISOString().slice(0, 10));
@@ -35,13 +38,21 @@ export function ClinicalEvolutionModal({
         setDescription('');
         setConduct('');
         setAttentionLevel('LOW');
+        setAiError('');
     }
 
-    function handleGenerateSummary() {
-        const generatedSummary = description.trim().split('.').find(Boolean)?.trim();
+    async function handleGenerateSummary() {
+        try {
+            setIsGeneratingSummary(true);
+            setAiError('');
 
-        if (generatedSummary) {
-            setSummary(generatedSummary);
+            const response = await analyzeClinicalEvolution({ description, conduct });
+            setSummary(response.summary);
+            setAttentionLevel(response.suggestedAttentionLevel);
+        } catch {
+            setAiError('Não foi possível gerar o resumo com IA.');
+        } finally {
+            setIsGeneratingSummary(false);
         }
     }
 
@@ -59,7 +70,7 @@ export function ClinicalEvolutionModal({
             description,
             evolutionDate: `${evolutionDate}T00:00:00`,
             patientId,
-            professionalId: currentUser.id ?? null,
+            professionalId: user?.userId ?? null,
             summary,
         });
 
@@ -119,7 +130,7 @@ export function ClinicalEvolutionModal({
                     controlProps={{
                         disabled: true,
                         type: 'text',
-                        value: currentUser.name ?? 'Profissional não identificado',
+                        value: user?.name ?? 'Profissional não identificado',
                     }}
                 />
 
@@ -162,9 +173,10 @@ export function ClinicalEvolutionModal({
                             size="sm"
                             type="button"
                             variant="secondary"
+                            disabled={!description.trim() || isGeneratingSummary}
                             onClick={handleGenerateSummary}
                         >
-                            Gerar resumo com IA
+                            {isGeneratingSummary ? 'Gerando resumo...' : 'Gerar resumo com IA'}
                         </Button>
                     </div>
 
@@ -174,6 +186,8 @@ export function ClinicalEvolutionModal({
                         value={summary}
                         onChange={(event) => setSummary(event.target.value)}
                     />
+
+                    {aiError && <p className="clinical-evolution-summary__error">{aiError}</p>}
                 </section>
 
                 <div className="clinical-evolution-modal__actions">

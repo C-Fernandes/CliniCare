@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import com.clinicare.dto.ApiResponseDTO;
 
@@ -36,6 +37,26 @@ public class GlobalExceptionHandler {
                                                 "Erro de validação.",
                                                 null,
                                                 error));
+        }
+
+        @ExceptionHandler(BadCredentialsException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleBadCredentials(BadCredentialsException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                                new ApiResponseDTO<>(
+                                                false,
+                                                "Não foi possível autenticar.",
+                                                null,
+                                                ex.getMessage()));
+        }
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleIllegalArgument(IllegalArgumentException ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                                new ApiResponseDTO<>(
+                                                false,
+                                                "Não foi possível processar a solicitação.",
+                                                null,
+                                                ex.getMessage()));
         }
 
         @ExceptionHandler(Exception.class)

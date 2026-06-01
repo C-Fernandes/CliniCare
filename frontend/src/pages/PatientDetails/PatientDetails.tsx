@@ -5,14 +5,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './PatientDetails.scss';
 import { Badge, Button, Card } from '../../components/UI';
 import { ClinicalEvolutionModal } from '../../components/ClinicalEvolutionModal/ClinicalEvolutionModal';
+import { PatientModal } from '../../components/PatientModal/PatientModal';
 import {
     createClinicalEvolution,
     getClinicalEvolutionsByPatient,
 } from '../../services/clinicalEvolutions';
-import { getPatientById } from '../../services/patients';
+import { getPatientById, updatePatient } from '../../services/patients';
 import type { ClinicalEvolution, AttentionLevel } from '../../types/clinicalEvolution';
 import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
-import type { Patient, PatientStatus } from '../../types/patient';
+import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { formatDate, formatDateTime } from '../../utils/formatters';
 
 const statusLabels: Record<PatientStatus, string> = {
@@ -50,6 +51,7 @@ export function PatientDetails() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [isEvolutionModalOpen, setIsEvolutionModalOpen] = useState(false);
+    const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
 
     useEffect(() => {
         async function loadPatientDetails() {
@@ -81,6 +83,11 @@ export function PatientDetails() {
         });
 
         setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
+    }
+
+    async function handleUpdatePatient(data: PatientFormData) {
+        const updatedPatient = await updatePatient(patientId, data);
+        setPatient(updatedPatient);
     }
 
     if (isLoading || error || !patient) {
@@ -159,6 +166,7 @@ export function PatientDetails() {
                         className="patient-edit-button"
                         icon={<Pencil size={18} />}
                         variant="secondary"
+                        onClick={() => setIsPatientModalOpen(true)}
                     >
                         Editar paciente
                     </Button>
@@ -212,9 +220,6 @@ export function PatientDetails() {
                                         </div>
                                     </div>
 
-                                    <button type="button" className="patient-history-link">
-                                        Ver detalhes
-                                    </button>
                                 </div>
                             </article>
                         ))}
@@ -232,6 +237,14 @@ export function PatientDetails() {
                 onCreateEvolution={handleCreateEvolution}
                 patientId={patient.id}
                 patientName={patient.name}
+            />
+
+            <PatientModal
+                key={`${patient.id}-${isPatientModalOpen}`}
+                isOpen={isPatientModalOpen}
+                onClose={() => setIsPatientModalOpen(false)}
+                onSavePatient={handleUpdatePatient}
+                patient={patient}
             />
         </div>
     );

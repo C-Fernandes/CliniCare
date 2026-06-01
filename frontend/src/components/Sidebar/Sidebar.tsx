@@ -10,11 +10,14 @@ import {
 } from 'lucide-react';
 
 import './Sidebar.scss';
+import { useAuth } from '../../hooks/useAuth';
 
 export function Sidebar() {
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
 
     function handleLogout() {
+        logout();
         navigate('/login');
     }
 
@@ -45,13 +48,14 @@ export function Sidebar() {
                 <NavLink to="/notifications">
                     <Bell size={18} />
                     Notificações
-                    <span className="sidebar__badge">3</span>
                 </NavLink>
 
-                <NavLink to="/users">
-                    <UserCog size={18} />
-                    Usuários
-                </NavLink>
+                {user?.role === 'ADMIN' && (
+                    <NavLink to="/users">
+                        <UserCog size={18} />
+                        Usuários
+                    </NavLink>
+                )}
 
                 <NavLink to="/profile">
                     <CircleUserRound size={18} />

@@ -2,8 +2,8 @@ package com.clinicare.controller;
 
 import com.clinicare.dto.ApiResponseDTO;
 import com.clinicare.dto.request.LoginRequestDTO;
-import com.clinicare.dto.response.UserResponseDTO;
-import com.clinicare.service.UserService;
+import com.clinicare.dto.response.LoginResponseDTO;
+import com.clinicare.service.AuthService;
 
 import jakarta.validation.Valid;
 
@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
-    public AuthController(UserService userService) {
-        this.userService = userService;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request) {
-        UserResponseDTO response = userService.login(request);
+    public ResponseEntity<ApiResponseDTO<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request) {
+        LoginResponseDTO response = authService.login(request);
 
         return ResponseEntity.ok(
                 new ApiResponseDTO<>(

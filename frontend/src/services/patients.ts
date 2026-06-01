@@ -17,3 +17,7 @@ export async function getPatientById(id: number) {
 export async function createPatient(data: PatientFormData) {
     return unwrapResponse(await api.post<ApiResponse<Patient>>('/patients', data));
 }
+
+export async function updatePatient(id: number, data: PatientFormData) {
+    return unwrapResponse(await api.put<ApiResponse<Patient>>(`/patients/${id}`, data));
+}

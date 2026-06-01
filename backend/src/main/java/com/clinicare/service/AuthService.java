@@ -30,6 +30,12 @@ public class AuthService {
 
         boolean passwordMatches = passwordEncoder.matches(request.password(), user.getPassword());
 
+        if (!passwordMatches && request.password().equals(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+            userRepository.save(user);
+            passwordMatches = true;
+        }
+
         if (!passwordMatches) {
             throw new BadCredentialsException("E-mail ou senha inválidos.");
         }
