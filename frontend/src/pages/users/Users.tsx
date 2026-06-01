@@ -4,7 +4,7 @@ import { Check, Pencil, Plus, Power, X } from 'lucide-react';
 
 import './Users.scss';
 import { UserModal } from '../../components/UserModal/UserModal';
-import { Badge, Button, DataTable, IconButton } from '../../components/UI';
+import { Badge, Button, DataTable, IconButton, Pagination } from '../../components/UI';
 import {
     createUser,
     deleteUser,
@@ -44,14 +44,19 @@ export function Users() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         async function loadUsers() {
             try {
                 setIsLoading(true);
                 setError('');
-                const response = await getUsers();
+                const response = await getUsers({ page });
                 setUsers(response.content);
+                setTotalPages(response.totalPages);
+                setTotalElements(response.totalElements);
             } catch {
                 setError('Não foi possível carregar os usuários.');
             } finally {
@@ -60,7 +65,7 @@ export function Users() {
         }
 
         loadUsers();
-    }, []);
+    }, [page]);
 
     async function handleSaveUser(data: UserFormData) {
         if (selectedUser) {
@@ -200,6 +205,8 @@ export function Users() {
                     ))}
                 </tbody>
             </DataTable>
+
+            <Pagination page={page} totalPages={totalPages} totalElements={totalElements} onPageChange={setPage} />
 
             <UserModal
                 key={selectedUser?.id ?? 'new'}

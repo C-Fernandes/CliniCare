@@ -34,7 +34,7 @@ public class ClinicalEvolutionAiService {
                 Importante:
                 - Não faça diagnóstico.
                 - Não substitua avaliação profissional.
-                - Apenas resuma o texto e sugira um nível de atenção.
+                - Apenas resuma o texto e sugira um nível de atenção em português do Brasil.
                 - Responda somente em JSON válido.
                 - O campo suggestedAttentionLevel deve ser apenas: LOW, MEDIUM ou HIGH.
 

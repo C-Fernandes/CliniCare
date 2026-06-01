@@ -12,3 +12,8 @@ export interface PageResponse<T> {
     number: number;
     size: number;
 }
+
+export interface PageRequest {
+    page?: number;
+    size?: number;
+}

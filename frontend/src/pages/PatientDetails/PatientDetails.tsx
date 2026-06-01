@@ -3,7 +3,7 @@ import { ArrowLeft, Pencil, Plus, Sparkles } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import './PatientDetails.scss';
-import { Badge, Button, Card } from '../../components/UI';
+import { Badge, Button, Card, Pagination } from '../../components/UI';
 import { ClinicalEvolutionModal } from '../../components/ClinicalEvolutionModal/ClinicalEvolutionModal';
 import { PatientModal } from '../../components/PatientModal/PatientModal';
 import {
@@ -58,6 +58,9 @@ export function PatientDetails() {
     const [patientSummary, setPatientSummary] = useState<PatientSummaryAiResponse | null>(null);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
     const [summaryError, setSummaryError] = useState('');
+    const [historyPage, setHistoryPage] = useState(0);
+    const [historyTotalPages, setHistoryTotalPages] = useState(0);
+    const [historyTotalElements, setHistoryTotalElements] = useState(0);
 
     useEffect(() => {
         async function loadPatientDetails() {
@@ -67,11 +70,13 @@ export function PatientDetails() {
 
                 const [patientResponse, evolutionsResponse] = await Promise.all([
                     getPatientById(patientId),
-                    getClinicalEvolutionsByPatient(patientId),
+                    getClinicalEvolutionsByPatient(patientId, { page: historyPage, size: 10 }),
                 ]);
 
                 setPatient(patientResponse);
                 setPatientEvolutions(evolutionsResponse.content);
+                setHistoryTotalPages(evolutionsResponse.totalPages);
+                setHistoryTotalElements(evolutionsResponse.totalElements);
             } catch {
                 setError('Paciente não encontrado');
             } finally {
@@ -80,7 +85,7 @@ export function PatientDetails() {
         }
 
         loadPatientDetails();
-    }, [patientId]);
+    }, [patientId, historyPage]);
 
     async function handleCreateEvolution(data: ClinicalEvolutionFormData) {
         const newEvolution = await createClinicalEvolution({
@@ -285,6 +290,13 @@ export function PatientDetails() {
                         Nenhuma evolução clínica registrada para este paciente.
                     </div>
                 )}
+
+                <Pagination
+                    page={historyPage}
+                    totalPages={historyTotalPages}
+                    totalElements={historyTotalElements}
+                    onPageChange={setHistoryPage}
+                />
             </Card>
 
             <ClinicalEvolutionModal

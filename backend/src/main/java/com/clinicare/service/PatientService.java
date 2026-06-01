@@ -3,6 +3,7 @@ package com.clinicare.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.clinicare.dto.request.PatientRequestDTO;
 import com.clinicare.dto.response.PatientResponseDTO;
@@ -78,5 +79,20 @@ public class PatientService implements GenericService<Patient, PatientRequestDTO
         return patientRepository
                 .findAllByNameContainingIgnoreCaseAndActiveTrue(name, pageable)
                 .map(patientMapper::toResponse);
+    }
+
+    public Page<PatientResponseDTO> search(String name, PatientStatus status, Pageable pageable) {
+        Specification<Patient> specification = (root, query, builder) -> builder.isTrue(root.get("active"));
+
+        if (name != null && !name.isBlank()) {
+            specification = specification.and((root, query, builder) ->
+                    builder.like(builder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+        }
+
+        if (status != null) {
+            specification = specification.and((root, query, builder) -> builder.equal(root.get("status"), status));
+        }
+
+        return patientRepository.findAll(specification, pageable).map(patientMapper::toResponse);
     }
 }

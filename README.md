@@ -8,6 +8,7 @@ PostgreSQL.
 ## Funcionalidades
 
 - Cadastro, listagem e consulta de pacientes.
+- Paginação server-side nas listagens de pacientes, usuários, notificações e histórico clínico.
 - Registro e histórico de evoluções clínicas por paciente.
 - Classificação das evoluções por nível de atenção.
 - Criação assíncrona de notificações ao registrar uma evolução.
@@ -350,6 +351,7 @@ Principais endpoints:
 | `GET`, `PUT`, `DELETE` | `/patients/{id}`                                     | Consulta, atualiza e remove logicamente um paciente  |
 | `GET`                  | `/patients/filter/status`                            | Filtra pacientes por status                          |
 | `GET`                  | `/patients/filter/name`                              | Busca pacientes por nome                             |
+| `GET`                  | `/patients/search`                                   | Lista pacientes com paginação e filtros combináveis  |
 | `GET`, `POST`          | `/clinical-evolutions`                               | Lista e registra evoluções                           |
 | `GET`                  | `/clinical-evolutions/patient/{patientId}`           | Lista evoluções de um paciente                       |
 | `GET`                  | `/clinical-evolutions/professional/{professionalId}` | Lista evoluções de um profissional                   |

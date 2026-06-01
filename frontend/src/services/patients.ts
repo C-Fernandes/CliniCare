@@ -1,11 +1,11 @@
 import { api, unwrapResponse } from './api';
-import type { ApiResponse, PageResponse } from '../types/api';
+import type { ApiResponse, PageRequest, PageResponse } from '../types/api';
 import type { Patient, PatientFormData } from '../types/patient';
 
-export async function getPatients() {
+export async function getPatients(params: PageRequest & { name?: string; status?: Patient['status'] } = {}) {
     return unwrapResponse(
-        await api.get<ApiResponse<PageResponse<Patient>>>('/patients', {
-            params: { page: 0, size: 100, sort: 'createdAt,desc' },
+        await api.get<ApiResponse<PageResponse<Patient>>>('/patients/search', {
+            params: { page: 0, size: 100, sort: 'createdAt,desc', ...params },
         })
     );
 }

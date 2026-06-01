@@ -4,11 +4,12 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.clinicare.enums.PatientStatus;
 import com.clinicare.model.Patient;
 
-public interface PatientRepository extends GenericRepository<Patient> {
+public interface PatientRepository extends GenericRepository<Patient>, JpaSpecificationExecutor<Patient> {
 
     Optional<Patient> findByCpfAndActiveTrue(String cpf);
 

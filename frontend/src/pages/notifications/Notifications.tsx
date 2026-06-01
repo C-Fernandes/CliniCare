@@ -3,7 +3,7 @@ import { Check, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import './Notifications.scss';
-import { Badge, Button, Card } from '../../components/UI';
+import { Badge, Button, Card, Pagination } from '../../components/UI';
 import {
     getNotifications,
     getNotificationsByPriority,
@@ -33,6 +33,9 @@ export function Notifications() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
     useEffect(() => {
         async function loadNotifications(currentFilter: NotificationFilter) {
@@ -42,12 +45,14 @@ export function Notifications() {
 
                 const response =
                     currentFilter === 'UNREAD'
-                        ? await getUnreadNotifications()
+                        ? await getUnreadNotifications({ page, size: 10 })
                         : currentFilter === 'HIGH'
-                            ? await getNotificationsByPriority('HIGH')
-                            : await getNotifications();
+                            ? await getNotificationsByPriority('HIGH', { page, size: 10 })
+                            : await getNotifications({ page, size: 10 });
 
                 setNotifications(response.content);
+                setTotalPages(response.totalPages);
+                setTotalElements(response.totalElements);
             } catch {
                 setError('Não foi possível carregar as notificações.');
             } finally {
@@ -56,7 +61,7 @@ export function Notifications() {
         }
 
         loadNotifications(filter);
-    }, [filter]);
+    }, [filter, page]);
 
     async function handleMarkAsRead(id: number) {
         await markNotificationAsRead(id);
@@ -75,7 +80,7 @@ export function Notifications() {
                 <button
                     type="button"
                     className={filter === 'ALL' ? 'active' : ''}
-                    onClick={() => setFilter('ALL')}
+                    onClick={() => { setFilter('ALL'); setPage(0); }}
                 >
                     Todas
                 </button>
@@ -83,7 +88,7 @@ export function Notifications() {
                 <button
                     type="button"
                     className={filter === 'UNREAD' ? 'active' : ''}
-                    onClick={() => setFilter('UNREAD')}
+                    onClick={() => { setFilter('UNREAD'); setPage(0); }}
                 >
                     Não lidas
                 </button>
@@ -91,7 +96,7 @@ export function Notifications() {
                 <button
                     type="button"
                     className={filter === 'HIGH' ? 'active' : ''}
-                    onClick={() => setFilter('HIGH')}
+                    onClick={() => { setFilter('HIGH'); setPage(0); }}
                 >
                     Alta prioridade
                 </button>
@@ -164,6 +169,8 @@ export function Notifications() {
                     </Card>
                 )}
             </section>
+
+            <Pagination page={page} totalPages={totalPages} totalElements={totalElements} onPageChange={setPage} />
         </div>
     );
 }

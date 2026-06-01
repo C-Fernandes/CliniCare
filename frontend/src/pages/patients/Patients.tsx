@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Eye, Pencil, Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PatientModal } from '../../components/PatientModal/PatientModal';
-import { Badge, Button, DataTable, IconButton } from '../../components/UI';
+import { Badge, Button, DataTable, IconButton, Pagination } from '../../components/UI';
 
 import './Patients.scss';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
@@ -32,6 +32,9 @@ export function Patients() {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -39,8 +42,15 @@ export function Patients() {
             try {
                 setIsLoading(true);
                 setError('');
-                const response = await getPatients();
+                const response = await getPatients({
+                    page,
+                    size: 10,
+                    name: search || undefined,
+                    status: status === 'ALL' ? undefined : status,
+                });
                 setPatients(response.content);
+                setTotalPages(response.totalPages);
+                setTotalElements(response.totalElements);
             } catch {
                 setError('Não foi possível carregar os pacientes.');
             } finally {
@@ -49,19 +59,7 @@ export function Patients() {
         }
 
         loadPatients();
-    }, []);
-
-    const filteredPatients = useMemo(() => {
-        return patients.filter((patient) => {
-            const matchesName = patient.name
-                .toLowerCase()
-                .includes(search.toLowerCase());
-
-            const matchesStatus = status === 'ALL' || patient.status === status;
-
-            return matchesName && matchesStatus;
-        });
-    }, [patients, search, status]);
+    }, [page, search, status]);
 
     async function handleSavePatient(data: PatientFormData) {
         if (selectedPatient) {
@@ -102,16 +100,20 @@ export function Patients() {
                         type="text"
                         placeholder="Buscar por nome..."
                         value={search}
-                        onChange={(event) => setSearch(event.target.value)}
+                        onChange={(event) => {
+                            setSearch(event.target.value);
+                            setPage(0);
+                        }}
                     />
                 </div>
 
                 <select
                     className="patients-filter"
                     value={status}
-                    onChange={(event) =>
-                        setStatus(event.target.value as PatientStatus | 'ALL')
-                    }
+                    onChange={(event) => {
+                        setStatus(event.target.value as PatientStatus | 'ALL');
+                        setPage(0);
+                    }}
                 >
                     <option value="ALL">Todos os status</option>
                     <option value="IN_FOLLOW_UP">Em acompanhamento</option>
@@ -132,7 +134,7 @@ export function Patients() {
 
             <DataTable
                 empty={isLoading ? 'Carregando pacientes...' : error || 'Nenhum paciente encontrado.'}
-                isEmpty={isLoading || Boolean(error) || filteredPatients.length === 0}
+                isEmpty={isLoading || Boolean(error) || patients.length === 0}
                 minWidth={1000}
                 tableClassName="patients-table"
                 wrapperClassName="patients-table-card"
@@ -151,7 +153,7 @@ export function Patients() {
                 </thead>
 
                 <tbody>
-                    {filteredPatients.map((patient) => (
+                    {patients.map((patient) => (
                         <tr key={patient.id}>
                             <td>
                                 <strong>{patient.name}</strong>
@@ -191,6 +193,8 @@ export function Patients() {
                     ))}
                 </tbody>
             </DataTable>
+
+            <Pagination page={page} totalPages={totalPages} totalElements={totalElements} onPageChange={setPage} />
 
             <PatientModal
                 key={selectedPatient?.id ?? 'new'}

@@ -51,4 +51,16 @@ public class PatientController
                         response,
                         null));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDTO<Page<PatientResponseDTO>>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) PatientStatus status,
+            Pageable pageable) {
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                true,
+                "Pacientes encontrados com sucesso.",
+                service.search(name, status, pageable),
+                null));
+    }
 }
