@@ -7,6 +7,7 @@ import { analyzeClinicalEvolution } from '../../services/clinicalEvolutionAi';
 import { getApiError } from '../../services/api';
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../hooks/useAuth';
+import { getLocalDateInputValue } from '../../utils/formatters';
 
 import './ClinicalEvolutionModal.scss';
 
@@ -26,7 +27,7 @@ export function ClinicalEvolutionModal({
     patientName,
 }: ClinicalEvolutionModalProps) {
     const { user } = useAuth();
-    const [evolutionDate, setEvolutionDate] = useState(new Date().toISOString().slice(0, 10));
+    const [evolutionDate, setEvolutionDate] = useState(getLocalDateInputValue());
     const [summary, setSummary] = useState('');
     const [description, setDescription] = useState('');
     const [conduct, setConduct] = useState('');
@@ -36,7 +37,7 @@ export function ClinicalEvolutionModal({
     const [aiError, setAiError] = useState('');
 
     function resetForm() {
-        setEvolutionDate(new Date().toISOString().slice(0, 10));
+        setEvolutionDate(getLocalDateInputValue());
         setSummary('');
         setDescription('');
         setConduct('');

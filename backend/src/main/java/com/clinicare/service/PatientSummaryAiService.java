@@ -1,5 +1,6 @@
 package com.clinicare.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,9 @@ import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class PatientSummaryAiService {
+
+    private static final DateTimeFormatter BRAZILIAN_DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final PatientRepository patientRepository;
     private final ClinicalEvolutionRepository clinicalEvolutionRepository;
@@ -59,6 +63,7 @@ public class PatientSummaryAiService {
                 - Não faça diagnóstico.
                 - Não substitua avaliação profissional.
                 - Gere um resumo longitudinal objetivo.
+                - Quando mencionar datas, use sempre o padrão brasileiro dd/MM/aaaa ou dd/MM/aaaa HH:mm.
                 - Responda somente em JSON válido.
                 - suggestedAttentionLevel deve ser apenas: LOW, MEDIUM ou HIGH.
                 - Se não houver evoluções, informe que o histórico é insuficiente.
@@ -91,7 +96,7 @@ public class PatientSummaryAiService {
                 Evolução: %s
                 Conduta: %s
                 """.formatted(
-                evolution.getEvolutionDate(),
+                evolution.getEvolutionDate().format(BRAZILIAN_DATE_TIME_FORMATTER),
                 evolution.getAttentionLevel(),
                 evolution.getSummary(),
                 evolution.getDescription(),

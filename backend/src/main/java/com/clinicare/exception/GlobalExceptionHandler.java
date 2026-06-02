@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import com.clinicare.dto.ApiResponseDTO;
@@ -59,6 +60,16 @@ public class GlobalExceptionHandler {
                                                 ex.getMessage()));
         }
 
+        @ExceptionHandler(NoResourceFoundException.class)
+        public ResponseEntity<ApiResponseDTO<Object>> handleNoResourceFound(NoResourceFoundException ex) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                                new ApiResponseDTO<>(
+                                                false,
+                                                "Recurso não encontrado.",
+                                                null,
+                                                "A rota solicitada não está disponível."));
+        }
+
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ApiResponseDTO<Object>> handleGenericException(Exception ex) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -66,6 +77,6 @@ public class GlobalExceptionHandler {
                                                 false,
                                                 "Erro interno no servidor.",
                                                 null,
-                                                ex.getMessage()));
+                                                "Não foi possível concluir a solicitação."));
         }
 }

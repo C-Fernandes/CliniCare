@@ -3,6 +3,7 @@ import { useState } from 'react';
 import './PatientModal.scss';
 import { Button, FormField, Modal } from '../UI';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
+import { formatCpf, onlyDigits } from '../../utils/formatters';
 
 interface PatientModalProps {
     isOpen: boolean;
@@ -18,7 +19,7 @@ export function PatientModal({
     patient,
 }: PatientModalProps) {
     const [name, setName] = useState(patient?.name ?? '');
-    const [cpf, setCpf] = useState(patient?.cpf ?? '');
+    const [cpf, setCpf] = useState(formatCpf(patient?.cpf));
     const [birthDate, setBirthDate] = useState(patient?.birthDate ?? '');
     const [phone, setPhone] = useState(patient?.phone ?? '');
     const [email, setEmail] = useState(patient?.email ?? '');
@@ -49,7 +50,7 @@ export function PatientModal({
 
         await onSavePatient({
             name,
-            cpf,
+            cpf: onlyDigits(cpf),
             birthDate,
             phone,
             email,
@@ -90,7 +91,9 @@ export function PatientModal({
                         htmlFor="patient-cpf"
                         label="CPF *"
                         controlProps={{
-                            onChange: (event) => setCpf(event.target.value),
+                            inputMode: 'numeric',
+                            maxLength: 14,
+                            onChange: (event) => setCpf(formatCpf(event.target.value)),
                             placeholder: '000.000.000-00',
                             required: true,
                             type: 'text',

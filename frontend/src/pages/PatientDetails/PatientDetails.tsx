@@ -17,7 +17,7 @@ import type { PatientSummaryAiResponse } from '../../services/patientSummaryAi';
 import type { ClinicalEvolution, AttentionLevel } from '../../types/clinicalEvolution';
 import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
-import { formatDate, formatDateTime } from '../../utils/formatters';
+import { formatCpf, formatDate, formatDateTime } from '../../utils/formatters';
 import { useToast } from '../../hooks/useToast';
 
 const statusLabels: Record<PatientStatus, string> = {
@@ -95,7 +95,7 @@ export function PatientDetails() {
         try {
             const newEvolution = await createClinicalEvolution({
                 ...data,
-                evolutionDate: new Date(data.evolutionDate).toISOString(),
+                evolutionDate: data.evolutionDate,
             });
 
             setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
@@ -184,7 +184,7 @@ export function PatientDetails() {
                     <div className="patient-details-info">
                         <div>
                             <span>CPF</span>
-                            <strong>{patient.cpf}</strong>
+                            <strong>{formatCpf(patient.cpf)}</strong>
                         </div>
 
                         <div>

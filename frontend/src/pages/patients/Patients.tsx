@@ -9,7 +9,7 @@ import './Patients.scss';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { createPatient, getPatients, updatePatient } from '../../services/patients';
 import { getApiError } from '../../services/api';
-import { formatDate } from '../../utils/formatters';
+import { formatCpf, formatDate } from '../../utils/formatters';
 import { useToast } from '../../hooks/useToast';
 
 const statusLabels: Record<PatientStatus, string> = {
@@ -174,7 +174,7 @@ export function Patients() {
                                 <strong>{patient.name}</strong>
                             </td>
 
-                            <td>{patient.cpf}</td>
+                            <td>{formatCpf(patient.cpf)}</td>
                             <td>{formatDate(patient.birthDate)}</td>
                             <td>{patient.phone}</td>
                             <td>{patient.email}</td>
