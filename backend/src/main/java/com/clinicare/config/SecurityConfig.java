@@ -30,6 +30,9 @@ public class SecurityConfig {
     @Value("${security.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+    private String allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -76,9 +79,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000"));
+        config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
 
         config.setAllowedMethods(List.of(
                 "GET",

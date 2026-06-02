@@ -33,6 +33,7 @@ services:
       SPRING_JPA_OPEN_IN_VIEW: "false"
       SECURITY_JWT_SECRET: ${SECURITY_JWT_SECRET:-change-this-local-jwt-secret-with-at-least-32-characters}
       SECURITY_JWT_EXPIRATION_MINUTES: ${SECURITY_JWT_EXPIRATION_MINUTES:-120}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_API_URL: ${GEMINI_API_URL:-https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent}
       CLINICARE_BOOTSTRAP_ADMIN_ENABLED: ${CLINICARE_BOOTSTRAP_ADMIN_ENABLED:-true}
