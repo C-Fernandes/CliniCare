@@ -2,6 +2,8 @@ package com.clinicare.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.clinicare.dto.request.UserRequestDTO;
 import com.clinicare.dto.response.UserResponseDTO;
@@ -60,6 +62,11 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
     }
 
     @Override
+    public Page<UserResponseDTO> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(userMapper::toResponse);
+    }
+
+    @Override
     public UserResponseDTO update(Long id, UserRequestDTO request) {
         User user = userRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
@@ -89,6 +96,14 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
     public UserResponseDTO reject(Long id) {
         User user = findActiveUser(id);
         user.setApprovalStatus(UserApprovalStatus.REJECTED);
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    public UserResponseDTO activate(Long id) {
+        User user = userRepository.findByIdIncludingInactive(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+
+        user.setActive(true);
         return userMapper.toResponse(userRepository.save(user));
     }
 

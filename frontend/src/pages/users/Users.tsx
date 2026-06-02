@@ -4,11 +4,12 @@ import { Check, Pencil, Plus, Power, X } from 'lucide-react';
 
 import './Users.scss';
 import { UserModal } from '../../components/UserModal/UserModal';
-import { Badge, Button, DataTable, IconButton, Pagination } from '../../components/UI';
+import { Badge, Button, DataTable, IconButton, Modal, Pagination } from '../../components/UI';
 import {
     createUser,
     deleteUser,
     getUsers,
+    activateUser,
     approveUser,
     rejectUser,
     updateUser,
@@ -49,6 +50,7 @@ export function Users() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
+    const [userPendingDeactivation, setUserPendingDeactivation] = useState<User | null>(null);
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -110,17 +112,48 @@ export function Users() {
         setIsModalOpen(false);
     }
 
-    async function handleDeleteUser(id: number) {
+    async function handleToggleUserActive(userToToggle: User) {
         try {
-            await deleteUser(id);
-            setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
-            showToast({ message: 'Usuário inativado com sucesso.', type: 'success' });
+            if (userToToggle.active) {
+                await deleteUser(userToToggle.id);
+                setUsers((currentUsers) =>
+                    currentUsers.map((user) =>
+                        user.id === userToToggle.id ? { ...user, active: false } : user
+                    )
+                );
+                showToast({ message: 'Usuário inativado com sucesso.', type: 'success' });
+                return;
+            }
+
+            const updatedUser = await activateUser(userToToggle.id);
+            setUsers((currentUsers) =>
+                currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
+            );
+            showToast({ message: 'Usuário ativado com sucesso.', type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, 'Não foi possível inativar o usuário.'),
+                message: getApiError(
+                    requestError,
+                    userToToggle.active
+                        ? 'Não foi possível inativar o usuário.'
+                        : 'Não foi possível ativar o usuário.'
+                ),
                 type: 'error',
             });
         }
+    }
+
+    function requestUserDeactivation(userToDeactivate: User) {
+        setUserPendingDeactivation(userToDeactivate);
+    }
+
+    async function confirmUserDeactivation() {
+        if (!userPendingDeactivation) {
+            return;
+        }
+
+        await handleToggleUserActive(userPendingDeactivation);
+        setUserPendingDeactivation(null);
     }
 
     async function handleApproval(id: number, approve: boolean) {
@@ -217,16 +250,18 @@ export function Users() {
                                             </IconButton>
                                         </>
                                     )}
-                                    <IconButton
-                                        label="Editar usuário"
-                                        onClick={() => openEditUserModal(user)}
-                                    >
-                                        <Pencil size={18} />
-                                    </IconButton>
+                                    {user.active && (
+                                        <IconButton
+                                            label="Editar usuário"
+                                            onClick={() => openEditUserModal(user)}
+                                        >
+                                            <Pencil size={18} />
+                                        </IconButton>
+                                    )}
 
                                     <IconButton
-                                        label="Inativar usuário"
-                                        onClick={() => handleDeleteUser(user.id)}
+                                        label={user.active ? 'Inativar usuário' : 'Ativar usuário'}
+                                        onClick={() => user.active ? requestUserDeactivation(user) : handleToggleUserActive(user)}
                                     >
                                         <Power size={18} />
                                     </IconButton>
@@ -246,6 +281,35 @@ export function Users() {
                 onSaveUser={handleSaveUser}
                 user={selectedUser}
             />
+
+            <Modal
+                className="user-deactivation-modal"
+                isOpen={Boolean(userPendingDeactivation)}
+                onClose={() => setUserPendingDeactivation(null)}
+                title="Inativar usuário"
+            >
+                <div className="user-deactivation-modal__content">
+                    <p>
+                        Tem certeza que deseja inativar
+                        {' '}
+                        <strong>{userPendingDeactivation?.name}</strong>?
+                    </p>
+
+                    <p>
+                        Esse usuário não conseguirá acessar o sistema até ser ativado novamente.
+                    </p>
+                </div>
+
+                <div className="user-deactivation-modal__actions">
+                    <Button variant="secondary" onClick={() => setUserPendingDeactivation(null)}>
+                        Cancelar
+                    </Button>
+
+                    <Button variant="danger" onClick={confirmUserDeactivation}>
+                        Sim, inativar
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
 }

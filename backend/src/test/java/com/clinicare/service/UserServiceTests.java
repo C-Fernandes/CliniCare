@@ -12,13 +12,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +84,55 @@ class UserServiceTests {
 
         assertEquals(UserApprovalStatus.APPROVED, user.getApprovalStatus());
         verify(emailService).sendAccountApproved(user);
+    }
+
+    @Test
+    void findAllIncludesInactiveUsers() {
+        User activeUser = new User("Ativo", "active@clinicare.local", "password", UserRole.PROFESSIONAL);
+        activeUser.setId(1L);
+        User inactiveUser = new User("Inativo", "inactive@clinicare.local", "password", UserRole.PROFESSIONAL);
+        inactiveUser.setId(2L);
+        inactiveUser.setActive(false);
+        UserResponseDTO activeResponse = new UserResponseDTO(
+                1L, activeUser.getName(), activeUser.getEmail(), activeUser.getRole(), activeUser.getApprovalStatus(),
+                true, null, null);
+        UserResponseDTO inactiveResponse = new UserResponseDTO(
+                2L, inactiveUser.getName(), inactiveUser.getEmail(), inactiveUser.getRole(),
+                inactiveUser.getApprovalStatus(), false, null, null);
+
+        when(userRepository.findAll(Pageable.unpaged())).thenReturn(new PageImpl<>(List.of(activeUser, inactiveUser)));
+        when(userMapper.toResponse(activeUser)).thenReturn(activeResponse);
+        when(userMapper.toResponse(inactiveUser)).thenReturn(inactiveResponse);
+
+        var response = userService.findAll(Pageable.unpaged());
+
+        assertEquals(2, response.getTotalElements());
+        assertTrue(response.getContent().stream().anyMatch(user -> Boolean.FALSE.equals(user.active())));
+    }
+
+    @Test
+    void activateRestoresInactiveUser() {
+        User user = new User("Profissional", "professional@clinicare.local", "password", UserRole.PROFESSIONAL);
+        user.setId(1L);
+        user.setActive(false);
+        UserResponseDTO response = new UserResponseDTO(
+                1L,
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getApprovalStatus(),
+                true,
+                null,
+                null);
+
+        when(userRepository.findByIdIncludingInactive(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(response);
+
+        UserResponseDTO activatedUser = userService.activate(1L);
+
+        assertTrue(user.isActive());
+        assertTrue(activatedUser.active());
     }
 
     @Test

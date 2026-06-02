@@ -22,6 +22,10 @@ export async function deleteUser(id: number) {
     await api.delete(`/users/${id}`);
 }
 
+export async function activateUser(id: number) {
+    return unwrapResponse(await api.patch<ApiResponse<User>>(`/users/${id}/activate`));
+}
+
 export async function approveUser(id: number) {
     return unwrapResponse(await api.patch<ApiResponse<User>>(`/users/${id}/approve`));
 }

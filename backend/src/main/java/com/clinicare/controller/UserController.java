@@ -31,4 +31,10 @@ public class UserController extends GenericController<User, UserRequestDTO, User
         return ResponseEntity.ok(new ApiResponseDTO<>(
                 true, "Usuário recusado com sucesso.", service.reject(id), null));
     }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<ApiResponseDTO<UserResponseDTO>> activate(@PathVariable Long id) {
+        return ResponseEntity.ok(new ApiResponseDTO<>(
+                true, "Usuário ativado com sucesso.", service.activate(id), null));
+    }
 }
