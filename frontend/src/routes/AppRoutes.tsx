@@ -4,6 +4,7 @@ import { Login } from '../pages/login/Login';
 import { Register } from '../pages/register/Register';
 import { ForgotPassword } from '../pages/forgotPassword/ForgotPassword';
 import { ResetPassword } from '../pages/resetPassword/ResetPassword';
+import { PendingApproval } from '../pages/pendingApproval/PendingApproval';
 import { AppLayout } from '../layouts/appLayout/AppLayout';
 import { Dashboard } from '../pages/dashboard/Dashboard';
 import { Patients } from '../pages/patients/Patients';
@@ -22,6 +23,7 @@ export function AppRoutes() {
                 <Route element={<RouteGuard publicOnly />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/pending-approval" element={<PendingApproval />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                 </Route>

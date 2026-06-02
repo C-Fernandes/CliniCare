@@ -38,7 +38,6 @@ public class UserMapper implements GenericMapper<User, UserRequestDTO, UserRespo
     public void updateEntityFromRequest(UserRequestDTO request, User entity) {
         entity.setName(request.name());
         entity.setEmail(request.email());
-        entity.setPassword(request.password());
         entity.setRole(request.role());
     }
 }

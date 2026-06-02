@@ -1,19 +1,22 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 
 import '../login/Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { getApiError } from '../../services/api';
 import { register } from '../../services/auth';
+import { useToast } from '../../hooks/useToast';
 
 export function Register() {
+    const navigate = useNavigate();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmation, setConfirmation] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const { showToast } = useToast();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -22,14 +25,19 @@ export function Register() {
 
         if (password !== confirmation) {
             setError('As senhas não coincidem.');
+            showToast({ message: 'As senhas não coincidem.', type: 'error' });
             return;
         }
 
         try {
             await register({ name, email, password });
             setMessage('Conta criada. Aguarde a aprovação do administrador.');
+            showToast({ message: 'Conta criada e enviada para aprovação.', type: 'success' });
+            navigate('/pending-approval', { replace: true, state: { email } });
         } catch (requestError) {
-            setError(getApiError(requestError, 'Não foi possível criar sua conta.'));
+            const apiError = getApiError(requestError, 'Não foi possível criar sua conta.');
+            setError(apiError);
+            showToast({ message: apiError, type: 'error' });
         }
     }
 

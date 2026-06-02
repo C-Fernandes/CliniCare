@@ -18,6 +18,7 @@ import type { ClinicalEvolution, AttentionLevel } from '../../types/clinicalEvol
 import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { formatDate, formatDateTime } from '../../utils/formatters';
+import { useToast } from '../../hooks/useToast';
 
 const statusLabels: Record<PatientStatus, string> = {
     IN_FOLLOW_UP: 'Em acompanhamento',
@@ -61,6 +62,7 @@ export function PatientDetails() {
     const [historyPage, setHistoryPage] = useState(0);
     const [historyTotalPages, setHistoryTotalPages] = useState(0);
     const [historyTotalElements, setHistoryTotalElements] = useState(0);
+    const { showToast } = useToast();
 
     useEffect(() => {
         async function loadPatientDetails() {
@@ -78,27 +80,47 @@ export function PatientDetails() {
                 setHistoryTotalPages(evolutionsResponse.totalPages);
                 setHistoryTotalElements(evolutionsResponse.totalElements);
             } catch {
-                setError('Paciente não encontrado');
+                const message = 'Paciente não encontrado';
+                setError(message);
+                showToast({ message, type: 'error' });
             } finally {
                 setIsLoading(false);
             }
         }
 
         loadPatientDetails();
-    }, [patientId, historyPage]);
+    }, [historyPage, patientId, showToast]);
 
     async function handleCreateEvolution(data: ClinicalEvolutionFormData) {
-        const newEvolution = await createClinicalEvolution({
-            ...data,
-            evolutionDate: new Date(data.evolutionDate).toISOString(),
-        });
+        try {
+            const newEvolution = await createClinicalEvolution({
+                ...data,
+                evolutionDate: new Date(data.evolutionDate).toISOString(),
+            });
 
-        setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
+            setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
+            showToast({ message: 'Evolução clínica criada com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível criar a evolução clínica.'),
+                type: 'error',
+            });
+            throw requestError;
+        }
     }
 
     async function handleUpdatePatient(data: PatientFormData) {
-        const updatedPatient = await updatePatient(patientId, data);
-        setPatient(updatedPatient);
+        try {
+            const updatedPatient = await updatePatient(patientId, data);
+            setPatient(updatedPatient);
+            showToast({ message: 'Paciente atualizado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível atualizar o paciente.'),
+                type: 'error',
+            });
+            throw requestError;
+        }
     }
 
     async function handleGenerateSummary() {
@@ -106,8 +128,11 @@ export function PatientDetails() {
             setIsGeneratingSummary(true);
             setSummaryError('');
             setPatientSummary(await summarizePatient(patientId));
+            showToast({ message: 'Resumo geral gerado com sucesso.', type: 'success' });
         } catch (requestError) {
-            setSummaryError(getApiError(requestError, 'Não foi possível gerar o resumo geral.'));
+            const message = getApiError(requestError, 'Não foi possível gerar o resumo geral.');
+            setSummaryError(message);
+            showToast({ message, type: 'error' });
         } finally {
             setIsGeneratingSummary(false);
         }

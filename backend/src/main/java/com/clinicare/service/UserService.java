@@ -71,14 +71,7 @@ public class UserService implements GenericService<User, UserRequestDTO, UserRes
                     }
                 });
 
-        String currentPassword = user.getPassword();
         userMapper.updateEntityFromRequest(request, user);
-
-        if (request.password() == null || request.password().isBlank()) {
-            user.setPassword(currentPassword);
-        } else {
-            user.setPassword(passwordEncoder.encode(request.password()));
-        }
 
         User updatedUser = userRepository.save(user);
 

@@ -3,6 +3,7 @@ import { Badge } from '../../UI';
 interface EvolutionItemProps {
     attention: string;
     date: string;
+    onClick: () => void;
     patient: string;
     professional: string;
     summary: string;
@@ -17,12 +18,13 @@ const attentionTones: Record<string, 'success' | 'warning' | 'danger'> = {
 export function EvolutionItem({
     attention,
     date,
+    onClick,
     patient,
     professional,
     summary,
 }: EvolutionItemProps) {
     return (
-        <div className="evolution-item">
+        <button className="evolution-item dashboard-link-item" onClick={onClick} type="button">
             <div className="evolution-item__header">
                 <strong>{patient}</strong>
                 <Badge tone={attentionTones[attention]}>Atenção: {attention}</Badge>
@@ -33,6 +35,6 @@ export function EvolutionItem({
             </p>
 
             <p className="evolution-item__summary">{summary}</p>
-        </div>
+        </button>
     );
 }

@@ -6,10 +6,12 @@ import './Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { useAuth } from '../../hooks/useAuth';
 import { getApiError } from '../../services/api';
+import { useToast } from '../../hooks/useToast';
 
 export function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
+    const { showToast } = useToast();
 
     const [email, setEmail] = useState('admin@clinicare.local');
     const [password, setPassword] = useState('admin123');
@@ -23,7 +25,9 @@ export function Login() {
             await login({ email, password });
             navigate('/dashboard');
         } catch (requestError) {
-            setError(getApiError(requestError, 'E-mail ou senha inválidos.'));
+            const message = getApiError(requestError, 'E-mail ou senha inválidos.');
+            setError(message);
+            showToast({ message, type: 'error' });
         }
     }
 

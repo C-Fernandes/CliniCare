@@ -86,8 +86,14 @@
 }
 
 .evolution-item {
-  padding: var(--space-5) 0;
+  width: 100%;
+  background: transparent;
+  border: 0;
   border-bottom: 1px solid #e2e8f0;
+  padding: var(--space-5) 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, padding-inline 0.2s ease;
 
   &:first-child {
     padding-top: 0;
@@ -96,6 +102,13 @@
   &:last-child {
     border-bottom: none;
     padding-bottom: 0;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: #f8fbff;
+    padding-inline: var(--space-3);
+    outline: none;
   }
 }
 
@@ -125,8 +138,14 @@
 }
 
 .notification-item {
-  padding: var(--space-5) 0;
+  width: 100%;
+  background: transparent;
+  border: 0;
   border-bottom: 1px solid #e2e8f0;
+  padding: var(--space-5) 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, padding-inline 0.2s ease;
 
   &:first-child {
     padding-top: 0;
@@ -135,6 +154,13 @@
   &:last-child {
     border-bottom: none;
     padding-bottom: 0;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: #f8fbff;
+    padding-inline: var(--space-3);
+    outline: none;
   }
 
   p {

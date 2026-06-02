@@ -83,11 +83,11 @@ class UserServiceTests {
     }
 
     @Test
-    void updateKeepsCurrentPasswordWhenPasswordIsBlank() {
+    void updateDoesNotAllowChangingPassword() {
         UserRequestDTO request = new UserRequestDTO(
                 "Profissional Atualizado",
                 "professional@clinicare.local",
-                "",
+                "new-password",
                 UserRole.PROFESSIONAL);
         User user = new User("Profissional", request.email(), "$2a$current", request.role());
         user.setId(1L);

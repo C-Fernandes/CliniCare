@@ -4,6 +4,8 @@ import { Sparkles } from 'lucide-react';
 import { Button, FormField, Modal } from '../UI';
 import type { AttentionLevel, ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
 import { analyzeClinicalEvolution } from '../../services/clinicalEvolutionAi';
+import { getApiError } from '../../services/api';
+import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../hooks/useAuth';
 
 import './ClinicalEvolutionModal.scss';
@@ -30,6 +32,7 @@ export function ClinicalEvolutionModal({
     const [conduct, setConduct] = useState('');
     const [attentionLevel, setAttentionLevel] = useState<AttentionLevel>('LOW');
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const { showToast } = useToast();
     const [aiError, setAiError] = useState('');
 
     function resetForm() {
@@ -49,8 +52,11 @@ export function ClinicalEvolutionModal({
             const response = await analyzeClinicalEvolution({ description, conduct });
             setSummary(response.summary);
             setAttentionLevel(response.suggestedAttentionLevel);
-        } catch {
-            setAiError('Não foi possível gerar o resumo com IA.');
+            showToast({ message: 'Resumo gerado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            const message = getApiError(requestError, 'Não foi possível gerar o resumo com IA.');
+            setAiError(message);
+            showToast({ message, type: 'error' });
         } finally {
             setIsGeneratingSummary(false);
         }

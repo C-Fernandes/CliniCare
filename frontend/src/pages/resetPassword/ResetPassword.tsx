@@ -6,6 +6,7 @@ import '../login/Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { getApiError } from '../../services/api';
 import { resetPassword } from '../../services/auth';
+import { useToast } from '../../hooks/useToast';
 
 export function ResetPassword() {
     const [searchParams] = useSearchParams();
@@ -14,6 +15,7 @@ export function ResetPassword() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const token = searchParams.get('token') ?? '';
+    const { showToast } = useToast();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -21,14 +23,18 @@ export function ResetPassword() {
 
         if (password !== confirmation) {
             setError('As senhas não coincidem.');
+            showToast({ message: 'As senhas não coincidem.', type: 'error' });
             return;
         }
 
         try {
             await resetPassword(token, password);
             setMessage('Senha redefinida. Você já pode entrar.');
+            showToast({ message: 'Senha redefinida com sucesso.', type: 'success' });
         } catch (requestError) {
-            setError(getApiError(requestError, 'Não foi possível redefinir a senha.'));
+            const apiError = getApiError(requestError, 'Não foi possível redefinir a senha.');
+            setError(apiError);
+            showToast({ message: apiError, type: 'error' });
         }
     }
 

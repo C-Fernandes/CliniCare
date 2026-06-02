@@ -10,8 +10,10 @@ import {
     getUnreadNotifications,
     markNotificationAsRead,
 } from '../../services/notifications';
+import { getApiError } from '../../services/api';
 import type { Notification, NotificationPriority } from '../../types/notification';
 import { formatDateTime } from '../../utils/formatters';
+import { useToast } from '../../hooks/useToast';
 
 type NotificationFilter = 'ALL' | 'UNREAD' | 'HIGH';
 
@@ -36,6 +38,7 @@ export function Notifications() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
+    const { showToast } = useToast();
 
     useEffect(() => {
         async function loadNotifications(currentFilter: NotificationFilter) {
@@ -54,24 +57,34 @@ export function Notifications() {
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch {
-                setError('Não foi possível carregar as notificações.');
+                const message = 'Não foi possível carregar as notificações.';
+                setError(message);
+                showToast({ message, type: 'error' });
             } finally {
                 setIsLoading(false);
             }
         }
 
         loadNotifications(filter);
-    }, [filter, page]);
+    }, [filter, page, showToast]);
 
     async function handleMarkAsRead(id: number) {
-        await markNotificationAsRead(id);
-        setNotifications((currentNotifications) =>
-            currentNotifications.map((notification) =>
-                notification.id === id
-                    ? { ...notification, readStatus: true }
-                    : notification
-            )
-        );
+        try {
+            await markNotificationAsRead(id);
+            setNotifications((currentNotifications) =>
+                currentNotifications.map((notification) =>
+                    notification.id === id
+                        ? { ...notification, readStatus: true }
+                        : notification
+                )
+            );
+            showToast({ message: 'Notificação marcada como lida.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível marcar a notificação como lida.'),
+                type: 'error',
+            });
+        }
     }
 
     return (

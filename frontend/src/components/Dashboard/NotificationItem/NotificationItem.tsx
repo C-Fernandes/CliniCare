@@ -2,6 +2,7 @@ import { Badge } from '../../UI';
 
 interface NotificationItemProps {
     date: string;
+    onClick: () => void;
     patient: string;
     priority: string;
     title: string;
@@ -15,12 +16,13 @@ const priorityTones: Record<string, 'success' | 'warning' | 'danger'> = {
 
 export function NotificationItem({
     date,
+    onClick,
     patient,
     priority,
     title,
 }: NotificationItemProps) {
     return (
-        <div className="notification-item">
+        <button className="notification-item dashboard-link-item" onClick={onClick} type="button">
             <div className="notification-item__header">
                 <div>
                     <span className="notification-item__dot" />
@@ -33,6 +35,6 @@ export function NotificationItem({
             <p>
                 {patient} · {date}
             </p>
-        </div>
+        </button>
     );
 }

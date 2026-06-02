@@ -27,7 +27,10 @@ api.interceptors.response.use(
             localStorage.removeItem(AUTH_STORAGE_KEY);
 
             if (!error.config?.url?.includes('/auth/login')) {
-                window.location.assign('/login');
+                window.dispatchEvent(new CustomEvent('clinicare:toast', {
+                    detail: { message: 'Sua sessão expirou. Faça login novamente.', type: 'error' },
+                }));
+                window.setTimeout(() => window.location.assign('/login'), 600);
             }
         }
 

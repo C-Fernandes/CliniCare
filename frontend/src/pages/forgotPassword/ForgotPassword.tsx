@@ -6,11 +6,13 @@ import '../login/Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { getApiError } from '../../services/api';
 import { requestPasswordReset } from '../../services/auth';
+import { useToast } from '../../hooks/useToast';
 
 export function ForgotPassword() {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const { showToast } = useToast();
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -18,8 +20,11 @@ export function ForgotPassword() {
             setError('');
             await requestPasswordReset(email);
             setMessage('Se houver uma conta vinculada, enviaremos as instruções.');
+            showToast({ message: 'Se houver uma conta vinculada, enviaremos as instruções.', type: 'success' });
         } catch (requestError) {
-            setError(getApiError(requestError, 'Não foi possível processar a solicitação.'));
+            const apiError = getApiError(requestError, 'Não foi possível processar a solicitação.');
+            setError(apiError);
+            showToast({ message: apiError, type: 'error' });
         }
     }
 

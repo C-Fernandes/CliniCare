@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Bell,
     ClipboardList,
@@ -14,6 +15,7 @@ import { StatCard } from '../../components/Dashboard/StatCard/StatCard';
 import { getClinicalEvolutions } from '../../services/clinicalEvolutions';
 import { getNotifications } from '../../services/notifications';
 import { getPatients } from '../../services/patients';
+import { useToast } from '../../hooks/useToast';
 import type { ClinicalEvolution } from '../../types/clinicalEvolution';
 import type { Notification } from '../../types/notification';
 import type { Patient } from '../../types/patient';
@@ -32,25 +34,31 @@ const priorityLabels = {
 } as const;
 
 export function Dashboard() {
+    const navigate = useNavigate();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [evolutions, setEvolutions] = useState<ClinicalEvolution[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const { showToast } = useToast();
 
     useEffect(() => {
         async function loadDashboard() {
-            const [patientsResponse, evolutionsResponse, notificationsResponse] = await Promise.all([
-                getPatients(),
-                getClinicalEvolutions(),
-                getNotifications(),
-            ]);
+            try {
+                const [patientsResponse, evolutionsResponse, notificationsResponse] = await Promise.all([
+                    getPatients(),
+                    getClinicalEvolutions(),
+                    getNotifications(),
+                ]);
 
-            setPatients(patientsResponse.content);
-            setEvolutions(evolutionsResponse.content);
-            setNotifications(notificationsResponse.content);
+                setPatients(patientsResponse.content);
+                setEvolutions(evolutionsResponse.content);
+                setNotifications(notificationsResponse.content);
+            } catch {
+                showToast({ message: 'Não foi possível carregar os dados do dashboard.', type: 'error' });
+            }
         }
 
         loadDashboard();
-    }, []);
+    }, [showToast]);
 
     const activePatients = useMemo(
         () => patients.filter((patient) => patient.active && patient.status === 'IN_FOLLOW_UP').length,
@@ -79,6 +87,7 @@ export function Dashboard() {
                                 attention={attentionLabels[evolution.attentionLevel]}
                                 date={formatDateTime(evolution.evolutionDate)}
                                 key={evolution.id}
+                                onClick={() => navigate(`/patients/${evolution.patientId}`)}
                                 patient={evolution.patientName}
                                 professional={evolution.professionalName ?? 'Sem profissional'}
                                 summary={evolution.summary || evolution.description}
@@ -93,6 +102,7 @@ export function Dashboard() {
                             <NotificationItem
                                 date={formatDateTime(notification.createdAt)}
                                 key={notification.id}
+                                onClick={() => navigate(notification.patientId ? `/patients/${notification.patientId}` : '/notifications')}
                                 patient={notification.patientName ?? 'Sem paciente'}
                                 priority={priorityLabels[notification.priority]}
                                 title={notification.title}

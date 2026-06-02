@@ -8,7 +8,9 @@ import { Badge, Button, DataTable, IconButton, Pagination } from '../../componen
 import './Patients.scss';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { createPatient, getPatients, updatePatient } from '../../services/patients';
+import { getApiError } from '../../services/api';
 import { formatDate } from '../../utils/formatters';
+import { useToast } from '../../hooks/useToast';
 
 const statusLabels: Record<PatientStatus, string> = {
     IN_FOLLOW_UP: 'Em acompanhamento',
@@ -36,6 +38,7 @@ export function Patients() {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     useEffect(() => {
         async function loadPatients() {
@@ -52,28 +55,40 @@ export function Patients() {
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch {
-                setError('Não foi possível carregar os pacientes.');
+                const message = 'Não foi possível carregar os pacientes.';
+                setError(message);
+                showToast({ message, type: 'error' });
             } finally {
                 setIsLoading(false);
             }
         }
 
         loadPatients();
-    }, [page, search, status]);
+    }, [page, search, showToast, status]);
 
     async function handleSavePatient(data: PatientFormData) {
-        if (selectedPatient) {
-            const updatedPatient = await updatePatient(selectedPatient.id, data);
-            setPatients((currentPatients) =>
-                currentPatients.map((patient) =>
-                    patient.id === updatedPatient.id ? updatedPatient : patient
-                )
-            );
-            return;
-        }
+        try {
+            if (selectedPatient) {
+                const updatedPatient = await updatePatient(selectedPatient.id, data);
+                setPatients((currentPatients) =>
+                    currentPatients.map((patient) =>
+                        patient.id === updatedPatient.id ? updatedPatient : patient
+                    )
+                );
+                showToast({ message: 'Paciente atualizado com sucesso.', type: 'success' });
+                return;
+            }
 
-        const newPatient = await createPatient(data);
-        setPatients((currentPatients) => [newPatient, ...currentPatients]);
+            const newPatient = await createPatient(data);
+            setPatients((currentPatients) => [newPatient, ...currentPatients]);
+            showToast({ message: 'Paciente criado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível salvar o paciente.'),
+                type: 'error',
+            });
+            throw requestError;
+        }
     }
 
     function openCreatePatientModal() {

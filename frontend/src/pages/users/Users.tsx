@@ -14,7 +14,9 @@ import {
     updateUser,
 } from '../../services/users';
 import type { User, UserApprovalStatus, UserFormData, UserRole } from '../../types/user';
+import { getApiError } from '../../services/api';
 import { formatDate } from '../../utils/formatters';
+import { useToast } from '../../hooks/useToast';
 
 const roleLabels: Record<UserRole, string> = {
     ADMIN: 'Administrador',
@@ -47,6 +49,7 @@ export function Users() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
+    const { showToast } = useToast();
 
     useEffect(() => {
         async function loadUsers() {
@@ -58,26 +61,38 @@ export function Users() {
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch {
-                setError('Não foi possível carregar os usuários.');
+                const message = 'Não foi possível carregar os usuários.';
+                setError(message);
+                showToast({ message, type: 'error' });
             } finally {
                 setIsLoading(false);
             }
         }
 
         loadUsers();
-    }, [page]);
+    }, [page, showToast]);
 
     async function handleSaveUser(data: UserFormData) {
-        if (selectedUser) {
-            const updatedUser = await updateUser(selectedUser.id, data);
-            setUsers((currentUsers) =>
-                currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
-            );
-            return;
-        }
+        try {
+            if (selectedUser) {
+                const updatedUser = await updateUser(selectedUser.id, data);
+                setUsers((currentUsers) =>
+                    currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
+                );
+                showToast({ message: 'Usuário atualizado com sucesso.', type: 'success' });
+                return;
+            }
 
-        const newUser = await createUser(data);
-        setUsers((currentUsers) => [...currentUsers, newUser]);
+            const newUser = await createUser(data);
+            setUsers((currentUsers) => [...currentUsers, newUser]);
+            showToast({ message: 'Usuário criado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível salvar o usuário.'),
+                type: 'error',
+            });
+            throw requestError;
+        }
     }
 
     function openCreateUserModal() {
@@ -96,15 +111,31 @@ export function Users() {
     }
 
     async function handleDeleteUser(id: number) {
-        await deleteUser(id);
-        setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
+        try {
+            await deleteUser(id);
+            setUsers((currentUsers) => currentUsers.filter((user) => user.id !== id));
+            showToast({ message: 'Usuário inativado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, 'Não foi possível inativar o usuário.'),
+                type: 'error',
+            });
+        }
     }
 
     async function handleApproval(id: number, approve: boolean) {
-        const updatedUser = approve ? await approveUser(id) : await rejectUser(id);
-        setUsers((currentUsers) =>
-            currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
-        );
+        try {
+            const updatedUser = approve ? await approveUser(id) : await rejectUser(id);
+            setUsers((currentUsers) =>
+                currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
+            );
+            showToast({ message: approve ? 'Usuário aprovado com sucesso.' : 'Usuário recusado com sucesso.', type: 'success' });
+        } catch (requestError) {
+            showToast({
+                message: getApiError(requestError, approve ? 'Não foi possível aprovar o usuário.' : 'Não foi possível recusar o usuário.'),
+                type: 'error',
+            });
+        }
     }
 
     return (

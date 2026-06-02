@@ -34,7 +34,7 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
         await onSaveUser({
             name,
             email,
-            password,
+            password: user ? undefined : password,
             role,
         });
 
@@ -80,16 +80,18 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
                     }}
                 />
 
-                <FormField
-                    htmlFor="password"
-                    label={user ? 'Nova senha (opcional)' : 'Senha'}
-                    controlProps={{
-                        onChange: (event) => setPassword(event.target.value),
-                        required: !user,
-                        type: 'password',
-                        value: password,
-                    }}
-                />
+                {!user && (
+                    <FormField
+                        htmlFor="password"
+                        label="Senha"
+                        controlProps={{
+                            onChange: (event) => setPassword(event.target.value),
+                            required: true,
+                            type: 'password',
+                            value: password,
+                        }}
+                    />
+                )}
 
                 <FormField
                     htmlFor="role"
