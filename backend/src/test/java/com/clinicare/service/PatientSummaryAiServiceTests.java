@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ class PatientSummaryAiServiceTests {
     void summarizeUsesPatientHistoryAndReturnsStructuredResponse() {
         Patient patient = createPatient();
         ClinicalEvolution evolution = new ClinicalEvolution(
-                LocalDateTime.now(),
+                ZonedDateTime.now(),
                 "Paciente estável.",
                 "Estabilidade clínica.",
                 "Manter acompanhamento.",

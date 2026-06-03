@@ -1,13 +1,13 @@
 package com.clinicare.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.dto.ResponseDTO;
 import com.clinicare.enums.AttentionLevel;
 
 public record ClinicalEvolutionResponseDTO(
                 Long id,
-                LocalDateTime evolutionDate,
+                ZonedDateTime evolutionDate,
                 String description,
                 String summary,
                 String conduct,
@@ -17,6 +17,6 @@ public record ClinicalEvolutionResponseDTO(
                 Long professionalId,
                 String professionalName,
                 Boolean active,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) implements ResponseDTO {
+                ZonedDateTime createdAt,
+                ZonedDateTime updatedAt) implements ResponseDTO {
 }

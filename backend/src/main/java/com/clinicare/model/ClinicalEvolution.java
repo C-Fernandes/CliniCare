@@ -8,7 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.enums.AttentionLevel;
 
@@ -17,7 +17,7 @@ import com.clinicare.enums.AttentionLevel;
 public class ClinicalEvolution extends BaseEntity {
 
     @Column(nullable = false)
-    private LocalDateTime evolutionDate;
+    private ZonedDateTime evolutionDate;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -44,7 +44,7 @@ public class ClinicalEvolution extends BaseEntity {
     }
 
     public ClinicalEvolution(
-            LocalDateTime evolutionDate,
+            ZonedDateTime evolutionDate,
             String description,
             String summary,
             String conduct,
@@ -60,11 +60,11 @@ public class ClinicalEvolution extends BaseEntity {
         this.professional = professional;
     }
 
-    public LocalDateTime getEvolutionDate() {
+    public ZonedDateTime getEvolutionDate() {
         return evolutionDate;
     }
 
-    public void setEvolutionDate(LocalDateTime evolutionDate) {
+    public void setEvolutionDate(ZonedDateTime evolutionDate) {
         this.evolutionDate = evolutionDate;
     }
 

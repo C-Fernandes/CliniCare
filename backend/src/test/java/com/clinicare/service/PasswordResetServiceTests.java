@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +62,7 @@ class PasswordResetServiceTests {
     @Test
     void resetPasswordChangesPasswordAndConsumesToken() {
         User user = createUser();
-        PasswordResetToken token = createToken(user, LocalDateTime.now().plusMinutes(5));
+        PasswordResetToken token = createToken(user, ZonedDateTime.now().plusMinutes(5));
         when(tokenRepository.findByTokenHashAndActiveTrue(any(String.class))).thenReturn(Optional.of(token));
         when(passwordEncoder.encode("new-password")).thenReturn("$2a$new");
 
@@ -76,7 +76,7 @@ class PasswordResetServiceTests {
 
     @Test
     void resetPasswordRejectsExpiredToken() {
-        PasswordResetToken token = createToken(createUser(), LocalDateTime.now().minusMinutes(1));
+        PasswordResetToken token = createToken(createUser(), ZonedDateTime.now().minusMinutes(1));
         when(tokenRepository.findByTokenHashAndActiveTrue(any(String.class))).thenReturn(Optional.of(token));
 
         assertThrows(IllegalArgumentException.class, () -> service.resetPassword("raw-token", "new-password"));
@@ -88,7 +88,7 @@ class PasswordResetServiceTests {
         return user;
     }
 
-    private PasswordResetToken createToken(User user, LocalDateTime expiresAt) {
+    private PasswordResetToken createToken(User user, ZonedDateTime expiresAt) {
         PasswordResetToken token = new PasswordResetToken();
         token.setUser(user);
         token.setExpiresAt(expiresAt);

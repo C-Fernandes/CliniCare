@@ -1,6 +1,6 @@
 package com.clinicare.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.dto.ResponseDTO;
 import com.clinicare.enums.NotificationPriority;
@@ -18,6 +18,6 @@ public record NotificationResponseDTO(
                 Long recipientId,
                 String recipientName,
                 Boolean active,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) implements ResponseDTO {
+                ZonedDateTime createdAt,
+                ZonedDateTime updatedAt) implements ResponseDTO {
 }

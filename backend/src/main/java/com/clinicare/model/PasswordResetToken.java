@@ -1,6 +1,6 @@
 package com.clinicare.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +21,9 @@ public class PasswordResetToken extends BaseEntity {
     private User user;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private ZonedDateTime expiresAt;
 
-    private LocalDateTime usedAt;
+    private ZonedDateTime usedAt;
 
     public String getTokenHash() {
         return tokenHash;
@@ -41,19 +41,19 @@ public class PasswordResetToken extends BaseEntity {
         this.user = user;
     }
 
-    public LocalDateTime getExpiresAt() {
+    public ZonedDateTime getExpiresAt() {
         return expiresAt;
     }
 
-    public void setExpiresAt(LocalDateTime expiresAt) {
+    public void setExpiresAt(ZonedDateTime expiresAt) {
         this.expiresAt = expiresAt;
     }
 
-    public LocalDateTime getUsedAt() {
+    public ZonedDateTime getUsedAt() {
         return usedAt;
     }
 
-    public void setUsedAt(LocalDateTime usedAt) {
+    public void setUsedAt(ZonedDateTime usedAt) {
         this.usedAt = usedAt;
     }
 }

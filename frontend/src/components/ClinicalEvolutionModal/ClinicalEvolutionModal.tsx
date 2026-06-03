@@ -7,7 +7,11 @@ import { analyzeClinicalEvolution } from '../../services/clinicalEvolutionAi';
 import { getApiError } from '../../services/api';
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../hooks/useAuth';
-import { getLocalDateInputValue } from '../../utils/formatters';
+import {
+    buildFortalezaZonedDateTime,
+    getLocalDateInputValue,
+    getLocalTimeInputValue,
+} from '../../utils/formatters';
 
 import './ClinicalEvolutionModal.scss';
 
@@ -28,6 +32,7 @@ export function ClinicalEvolutionModal({
 }: ClinicalEvolutionModalProps) {
     const { user } = useAuth();
     const [evolutionDate, setEvolutionDate] = useState(getLocalDateInputValue());
+    const [evolutionTime, setEvolutionTime] = useState(getLocalTimeInputValue());
     const [summary, setSummary] = useState('');
     const [description, setDescription] = useState('');
     const [conduct, setConduct] = useState('');
@@ -37,7 +42,9 @@ export function ClinicalEvolutionModal({
     const [aiError, setAiError] = useState('');
 
     function resetForm() {
-        setEvolutionDate(getLocalDateInputValue());
+        const now = new Date();
+        setEvolutionDate(getLocalDateInputValue(now));
+        setEvolutionTime(getLocalTimeInputValue(now));
         setSummary('');
         setDescription('');
         setConduct('');
@@ -75,7 +82,7 @@ export function ClinicalEvolutionModal({
             attentionLevel,
             conduct,
             description,
-            evolutionDate: `${evolutionDate}T00:00:00`,
+            evolutionDate: buildFortalezaZonedDateTime(evolutionDate, evolutionTime),
             patientId,
             professionalId: user?.userId ?? null,
             summary,
@@ -109,6 +116,17 @@ export function ClinicalEvolutionModal({
                             required: true,
                             type: 'date',
                             value: evolutionDate,
+                        }}
+                    />
+
+                    <FormField
+                        htmlFor="evolution-time"
+                        label="Hora da evolução"
+                        controlProps={{
+                            onChange: (event) => setEvolutionTime(event.target.value),
+                            required: true,
+                            type: 'time',
+                            value: evolutionTime,
                         }}
                     />
 

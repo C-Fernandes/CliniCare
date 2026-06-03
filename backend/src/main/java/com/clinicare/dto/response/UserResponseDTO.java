@@ -1,6 +1,6 @@
 package com.clinicare.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.dto.ResponseDTO;
 import com.clinicare.enums.UserRole;
@@ -13,6 +13,6 @@ public record UserResponseDTO(
                 UserRole role,
                 UserApprovalStatus approvalStatus,
                 Boolean active,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) implements ResponseDTO {
+                ZonedDateTime createdAt,
+                ZonedDateTime updatedAt) implements ResponseDTO {
 }

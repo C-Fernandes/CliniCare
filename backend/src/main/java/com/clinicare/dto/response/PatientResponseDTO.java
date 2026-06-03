@@ -1,7 +1,7 @@
 package com.clinicare.dto.response;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.dto.ResponseDTO;
 import com.clinicare.enums.PatientStatus;
@@ -16,6 +16,6 @@ public record PatientResponseDTO(
                 PatientStatus status,
                 String notes,
                 Boolean active,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) implements ResponseDTO {
+                ZonedDateTime createdAt,
+                ZonedDateTime updatedAt) implements ResponseDTO {
 }

@@ -7,6 +7,7 @@ import com.clinicare.dto.response.ClinicalEvolutionResponseDTO;
 import com.clinicare.model.ClinicalEvolution;
 import com.clinicare.model.Patient;
 import com.clinicare.model.User;
+import com.clinicare.util.AppDateTime;
 
 @Component
 public class ClinicalEvolutionMapper
@@ -16,7 +17,7 @@ public class ClinicalEvolutionMapper
     public ClinicalEvolution toEntity(ClinicalEvolutionRequestDTO request) {
         ClinicalEvolution evolution = new ClinicalEvolution();
 
-        evolution.setEvolutionDate(request.evolutionDate());
+        evolution.setEvolutionDate(AppDateTime.truncateToMinutes(request.evolutionDate()));
         evolution.setDescription(request.description());
         evolution.setSummary(request.summary());
         evolution.setConduct(request.conduct());
@@ -54,7 +55,7 @@ public class ClinicalEvolutionMapper
 
     @Override
     public void updateEntityFromRequest(ClinicalEvolutionRequestDTO request, ClinicalEvolution entity) {
-        entity.setEvolutionDate(request.evolutionDate());
+        entity.setEvolutionDate(AppDateTime.truncateToMinutes(request.evolutionDate()));
         entity.setDescription(request.description());
         entity.setSummary(request.summary());
         entity.setConduct(request.conduct());

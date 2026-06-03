@@ -1,7 +1,9 @@
 package com.clinicare.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
+
+import com.clinicare.util.AppDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -19,22 +21,22 @@ public abstract class BaseEntity {
     private Long id;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+    private ZonedDateTime updatedAt;
 
     @Column(nullable = false)
     private Boolean active = true;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = AppDateTime.now();
         this.active = true;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = AppDateTime.now();
     }
 
     @Override
@@ -59,11 +61,11 @@ public abstract class BaseEntity {
         this.id = id;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public ZonedDateTime getUpdatedAt() {
         return this.updatedAt;
     }
 
@@ -79,11 +81,11 @@ public abstract class BaseEntity {
         this.active = active;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(ZonedDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(ZonedDateTime createdAt) {
         this.createdAt = createdAt;
     }
 

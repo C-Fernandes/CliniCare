@@ -8,7 +8,11 @@ spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.hibernate.ddl-auto=${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.jdbc.time_zone=${APP_TIME_ZONE:America/Fortaleza}
 spring.jpa.open-in-view=false
+
+spring.jackson.time-zone=${APP_TIME_ZONE:America/Fortaleza}
+spring.jackson.serialization.write-dates-with-zone-id=true
 
 security.jwt.secret=${SECURITY_JWT_SECRET:change-this-local-jwt-secret-with-at-least-32-characters}
 security.jwt.expiration-minutes=${SECURITY_JWT_EXPIRATION_MINUTES:120}

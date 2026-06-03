@@ -3,14 +3,14 @@ package com.clinicare.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import com.clinicare.dto.RequestDTO;
 import com.clinicare.enums.AttentionLevel;
 
 public record ClinicalEvolutionRequestDTO(
 
-                @NotNull(message = "A data da evolução clínica é obrigatória.") LocalDateTime evolutionDate,
+                @NotNull(message = "A data da evolução clínica é obrigatória.") ZonedDateTime evolutionDate,
 
                 @NotBlank(message = "A descrição da evolução clínica é obrigatória.") String description,
 

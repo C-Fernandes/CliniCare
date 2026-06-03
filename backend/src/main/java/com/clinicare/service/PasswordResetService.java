@@ -3,7 +3,7 @@ package com.clinicare.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -16,6 +16,7 @@ import com.clinicare.model.PasswordResetToken;
 import com.clinicare.model.User;
 import com.clinicare.repository.PasswordResetTokenRepository;
 import com.clinicare.repository.UserRepository;
+import com.clinicare.util.AppDateTime;
 
 @Service
 public class PasswordResetService {
@@ -48,7 +49,7 @@ public class PasswordResetService {
             PasswordResetToken token = new PasswordResetToken();
             token.setTokenHash(hash(rawToken));
             token.setUser(user);
-            token.setExpiresAt(LocalDateTime.now().plusMinutes(expirationMinutes));
+            token.setExpiresAt(now().plusMinutes(expirationMinutes));
             tokenRepository.save(token);
             emailService.sendPasswordReset(user, rawToken);
         });
@@ -59,16 +60,20 @@ public class PasswordResetService {
         PasswordResetToken token = tokenRepository.findByTokenHashAndActiveTrue(hash(rawToken))
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido ou já utilizado."));
 
-        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (token.getExpiresAt().isBefore(now())) {
             throw new IllegalArgumentException("Token expirado. Solicite uma nova redefinição.");
         }
 
         User user = token.getUser();
         user.setPassword(passwordEncoder.encode(password));
-        token.setUsedAt(LocalDateTime.now());
+        token.setUsedAt(now());
         token.setActive(false);
         userRepository.save(user);
         tokenRepository.save(token);
+    }
+
+    private ZonedDateTime now() {
+        return AppDateTime.now();
     }
 
     private String hash(String token) {
