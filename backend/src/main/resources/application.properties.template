@@ -24,6 +24,10 @@ spring.mail.username=${SPRING_MAIL_USERNAME:}
 spring.mail.password=${SPRING_MAIL_PASSWORD:}
 spring.mail.properties.mail.smtp.auth=${SPRING_MAIL_SMTP_AUTH:false}
 spring.mail.properties.mail.smtp.starttls.enable=${SPRING_MAIL_STARTTLS_ENABLE:false}
+spring.mail.properties.mail.smtp.starttls.required=${SPRING_MAIL_STARTTLS_REQUIRED:false}
+spring.mail.properties.mail.smtp.connectiontimeout=${SPRING_MAIL_CONNECTION_TIMEOUT:10000}
+spring.mail.properties.mail.smtp.timeout=${SPRING_MAIL_TIMEOUT:10000}
+spring.mail.properties.mail.smtp.writetimeout=${SPRING_MAIL_WRITE_TIMEOUT:10000}
 
 clinicare.mail.from=${CLINICARE_MAIL_FROM:no-reply@clinicare.local}
 clinicare.app.base-url=${CLINICARE_APP_BASE_URL:http://localhost:3000}

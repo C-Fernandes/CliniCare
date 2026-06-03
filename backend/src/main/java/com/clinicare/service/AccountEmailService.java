@@ -5,11 +5,15 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.clinicare.model.User;
 
 @Service
 public class AccountEmailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountEmailService.class);
 
     private final JavaMailSender mailSender;
 
@@ -46,6 +50,12 @@ public class AccountEmailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+            logger.info("Transactional email sent to {} with subject '{}'", to, subject);
+        } catch (RuntimeException exception) {
+            logger.error("Failed to send transactional email to {} with subject '{}'", to, subject, exception);
+            throw exception;
+        }
     }
 }
