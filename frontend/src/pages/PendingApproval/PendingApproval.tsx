@@ -1,7 +1,7 @@
 import { Clock, LogIn, ShieldCheck } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import '../login/Login.scss';
+import '../Login/Login.scss';
 import './PendingApproval.scss';
 import { Button, Card } from '../../components/UI';
 import { usePreferences } from '../../hooks/usePreferences';

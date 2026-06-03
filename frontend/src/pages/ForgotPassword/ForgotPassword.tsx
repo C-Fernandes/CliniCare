@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 
-import '../login/Login.scss';
+import '../Login/Login.scss';
 import { Button, Card, FormField } from '../../components/UI';
 import { getApiError } from '../../services/api';
 import { requestPasswordReset } from '../../services/auth';
