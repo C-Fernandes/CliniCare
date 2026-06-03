@@ -52,7 +52,7 @@
 
   &--unread {
     background: var(--color-surface-subtle);
-    border-color: #b8dafa;
+    border-color: var(--color-border-primary-soft);
   }
 }
 
@@ -81,7 +81,7 @@
   flex-shrink: 0;
 
   &--read {
-    background: #cbd5e1;
+    background: var(--color-border-strong);
   }
 }
 

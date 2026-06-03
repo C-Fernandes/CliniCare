@@ -7,6 +7,7 @@ import { analyzeClinicalEvolution } from '../../services/clinicalEvolutionAi';
 import { getApiError } from '../../services/api';
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../hooks/useAuth';
+import { usePreferences } from '../../hooks/usePreferences';
 import {
     buildFortalezaZonedDateTime,
     getLocalDateInputValue,
@@ -31,6 +32,7 @@ export function ClinicalEvolutionModal({
     patientName,
 }: ClinicalEvolutionModalProps) {
     const { user } = useAuth();
+    const { t } = usePreferences();
     const [evolutionDate, setEvolutionDate] = useState(getLocalDateInputValue());
     const [evolutionTime, setEvolutionTime] = useState(getLocalTimeInputValue());
     const [summary, setSummary] = useState('');
@@ -60,9 +62,9 @@ export function ClinicalEvolutionModal({
             const response = await analyzeClinicalEvolution({ description, conduct });
             setSummary(response.summary);
             setAttentionLevel(response.suggestedAttentionLevel);
-            showToast({ message: 'Resumo gerado com sucesso.', type: 'success' });
+            showToast({ message: t('evolution.aiSuccess'), type: 'success' });
         } catch (requestError) {
-            const message = getApiError(requestError, 'Não foi possível gerar o resumo com IA.');
+            const message = getApiError(requestError, t('evolution.aiError'));
             setAiError(message);
             showToast({ message, type: 'error' });
         } finally {
@@ -100,17 +102,17 @@ export function ClinicalEvolutionModal({
             onClose={handleClose}
             overlayClassName="clinical-evolution-modal-overlay"
             size="lg"
-            title="Nova evolução clínica"
+            title={t('evolution.title')}
         >
             <p className="clinical-evolution-modal__subtitle">
-                Registrar evolução para {patientName}
+                {t('evolution.registerFor', { patientName })}
             </p>
 
             <form onSubmit={handleSubmit}>
                 <div className="clinical-evolution-form-grid">
                     <FormField
                         htmlFor="evolution-date"
-                        label="Data da evolução"
+                        label={t('evolution.date')}
                         controlProps={{
                             onChange: (event) => setEvolutionDate(event.target.value),
                             required: true,
@@ -121,7 +123,7 @@ export function ClinicalEvolutionModal({
 
                     <FormField
                         htmlFor="evolution-time"
-                        label="Hora da evolução"
+                        label={t('evolution.time')}
                         controlProps={{
                             onChange: (event) => setEvolutionTime(event.target.value),
                             required: true,
@@ -132,14 +134,14 @@ export function ClinicalEvolutionModal({
 
                     <FormField
                         htmlFor="attention-level"
-                        label="Nível de atenção"
+                        label={t('evolution.attentionLevel')}
                         controlProps={{
                             as: 'select',
                             children: (
                                 <>
-                                    <option value="LOW">Baixo</option>
-                                    <option value="MEDIUM">Médio</option>
-                                    <option value="HIGH">Alto</option>
+                                    <option value="LOW">{t('priority.LOW')}</option>
+                                    <option value="MEDIUM">{t('priority.MEDIUM')}</option>
+                                    <option value="HIGH">{t('priority.HIGH')}</option>
                                 </>
                             ),
                             onChange: (event) => setAttentionLevel(event.target.value as AttentionLevel),
@@ -151,22 +153,22 @@ export function ClinicalEvolutionModal({
                 <FormField
                     fullWidth
                     htmlFor="professional"
-                    label="Profissional responsável"
+                    label={t('evolution.professional')}
                     controlProps={{
                         disabled: true,
                         type: 'text',
-                        value: user?.name ?? 'Profissional não identificado',
+                        value: user?.name ?? t('evolution.professionalFallback'),
                     }}
                 />
 
                 <FormField
                     fullWidth
                     htmlFor="description"
-                    label="Descrição da evolução"
+                    label={t('evolution.description')}
                     controlProps={{
                         as: 'textarea',
                         onChange: (event) => setDescription(event.target.value),
-                        placeholder: 'Descreva o quadro clínico, queixas e observações.',
+                        placeholder: t('evolution.descriptionPlaceholder'),
                         required: true,
                         rows: 5,
                         value: description,
@@ -176,11 +178,11 @@ export function ClinicalEvolutionModal({
                 <FormField
                     fullWidth
                     htmlFor="conduct"
-                    label="Conduta realizada"
+                    label={t('evolution.conductLabel')}
                     controlProps={{
                         as: 'textarea',
                         onChange: (event) => setConduct(event.target.value),
-                        placeholder: 'Conduta adotada e próximos passos.',
+                        placeholder: t('evolution.conductPlaceholder'),
                         required: true,
                         rows: 4,
                         value: conduct,
@@ -191,7 +193,7 @@ export function ClinicalEvolutionModal({
                     <div className="clinical-evolution-summary__header">
                         <div>
                             <Sparkles size={18} />
-                            <strong>Resumo com IA (opcional)</strong>
+                            <strong>{t('evolution.summaryOptional')}</strong>
                         </div>
 
                         <Button
@@ -201,13 +203,13 @@ export function ClinicalEvolutionModal({
                             disabled={!description.trim() || isGeneratingSummary}
                             onClick={handleGenerateSummary}
                         >
-                            {isGeneratingSummary ? 'Gerando resumo...' : 'Gerar resumo com IA'}
+                            {isGeneratingSummary ? t('actions.generatingSummary') : t('evolution.summary')}
                         </Button>
                     </div>
 
                     <textarea
-                        aria-label="Resumo com IA"
-                        placeholder="O resumo gerado aparecerá aqui."
+                        aria-label={t('evolution.summary')}
+                        placeholder={t('evolution.aiPlaceholder')}
                         value={summary}
                         onChange={(event) => setSummary(event.target.value)}
                     />
@@ -217,10 +219,10 @@ export function ClinicalEvolutionModal({
 
                 <div className="clinical-evolution-modal__actions">
                     <Button variant="secondary" onClick={handleClose}>
-                        Cancelar
+                        {t('actions.cancel')}
                     </Button>
 
-                    <Button type="submit">Salvar evolução</Button>
+                    <Button type="submit">{t('actions.saveEvolution')}</Button>
                 </div>
             </form>
         </Modal>

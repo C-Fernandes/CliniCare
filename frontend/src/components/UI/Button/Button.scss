@@ -75,7 +75,7 @@
 
   &:hover {
     color: var(--color-danger);
-    border-color: #fecaca;
-    background: #fff5f5;
+    border-color: var(--color-border-danger-soft);
+    background: var(--color-danger-soft);
   }
 }

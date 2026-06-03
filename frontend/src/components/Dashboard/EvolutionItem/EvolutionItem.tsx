@@ -2,6 +2,8 @@ import { Badge } from '../../UI';
 
 interface EvolutionItemProps {
     attention: string;
+    attentionLabel: string;
+    attentionTone: 'success' | 'warning' | 'danger';
     date: string;
     onClick: () => void;
     patient: string;
@@ -9,14 +11,10 @@ interface EvolutionItemProps {
     summary: string;
 }
 
-const attentionTones: Record<string, 'success' | 'warning' | 'danger'> = {
-    Baixo: 'success',
-    Médio: 'warning',
-    Alto: 'danger',
-};
-
 export function EvolutionItem({
     attention,
+    attentionLabel,
+    attentionTone,
     date,
     onClick,
     patient,
@@ -27,7 +25,7 @@ export function EvolutionItem({
         <button className="evolution-item dashboard-link-item" onClick={onClick} type="button">
             <div className="evolution-item__header">
                 <strong>{patient}</strong>
-                <Badge tone={attentionTones[attention]}>Atenção: {attention}</Badge>
+                <Badge tone={attentionTone}>{attentionLabel}: {attention}</Badge>
             </div>
 
             <p className="evolution-item__meta">

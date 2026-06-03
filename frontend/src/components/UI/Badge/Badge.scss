@@ -12,29 +12,29 @@
 .badge--primary {
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  border-color: #b8dafa;
+  border-color: var(--color-border-primary-soft);
 }
 
 .badge--success {
   background: var(--color-success-soft);
   color: var(--color-success);
-  border-color: #bce8ca;
+  border-color: var(--color-border-success-soft);
 }
 
 .badge--warning {
   background: var(--color-warning-soft);
   color: var(--color-warning);
-  border-color: #f5d69d;
+  border-color: var(--color-border-warning-soft);
 }
 
 .badge--danger {
   background: var(--color-danger-soft);
   color: var(--color-danger);
-  border-color: #fecaca;
+  border-color: var(--color-border-danger-soft);
 }
 
 .badge--neutral {
-  background: #f1f5f9;
+  background: var(--color-surface-subtle);
   color: var(--color-muted);
   border-color: var(--color-border);
 }
@@ -42,5 +42,5 @@
 .badge--cyan {
   background: var(--color-cyan-soft);
   color: var(--color-cyan);
-  border-color: #bae6fd;
+  border-color: var(--color-border-cyan-soft);
 }

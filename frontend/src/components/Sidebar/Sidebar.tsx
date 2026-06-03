@@ -11,10 +11,12 @@ import {
 
 import './Sidebar.scss';
 import { useAuth } from '../../hooks/useAuth';
+import { usePreferences } from '../../hooks/usePreferences';
 
 export function Sidebar() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { t } = usePreferences();
 
     function handleLogout() {
         logout();
@@ -30,42 +32,42 @@ export function Sidebar() {
 
                 <div>
                     <strong>CliniCare</strong>
-                    <span>Acompanhamento clínico</span>
+                    <span>{t('app.subtitle')}</span>
                 </div>
             </div>
 
             <nav className="sidebar__nav">
                 <NavLink to="/dashboard">
                     <LayoutDashboard size={18} />
-                    Dashboard
+                    {t('common.dashboard')}
                 </NavLink>
 
                 <NavLink to="/patients">
                     <Users size={18} />
-                    Pacientes
+                    {t('nav.patients')}
                 </NavLink>
 
                 <NavLink to="/notifications">
                     <Bell size={18} />
-                    Notificações
+                    {t('nav.notifications')}
                 </NavLink>
 
                 {user?.role === 'ADMIN' && (
                     <NavLink to="/users">
                         <UserCog size={18} />
-                        Usuários
+                        {t('nav.users')}
                     </NavLink>
                 )}
 
                 <NavLink to="/profile">
                     <CircleUserRound size={18} />
-                    Perfil
+                    {t('nav.profile')}
                 </NavLink>
             </nav>
 
             <button className="sidebar__logout" onClick={handleLogout}>
                 <LogOut size={18} />
-                Sair
+                {t('actions.logout')}
             </button>
         </aside>
     );

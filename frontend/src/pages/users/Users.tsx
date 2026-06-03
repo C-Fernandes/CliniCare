@@ -18,21 +18,11 @@ import type { User, UserApprovalStatus, UserFormData, UserRole } from '../../typ
 import { getApiError } from '../../services/api';
 import { formatDate } from '../../utils/formatters';
 import { useToast } from '../../hooks/useToast';
-
-const roleLabels: Record<UserRole, string> = {
-    ADMIN: 'Administrador',
-    PROFESSIONAL: 'Profissional',
-};
+import { usePreferences } from '../../hooks/usePreferences';
 
 const roleTones: Record<UserRole, 'primary' | 'cyan'> = {
     ADMIN: 'primary',
     PROFESSIONAL: 'cyan',
-};
-
-const approvalLabels: Record<UserApprovalStatus, string> = {
-    PENDING: 'Pendente',
-    APPROVED: 'Aprovado',
-    REJECTED: 'Recusado',
 };
 
 const approvalTones: Record<UserApprovalStatus, 'warning' | 'success' | 'danger'> = {
@@ -52,6 +42,7 @@ export function Users() {
     const [totalElements, setTotalElements] = useState(0);
     const [userPendingDeactivation, setUserPendingDeactivation] = useState<User | null>(null);
     const { showToast } = useToast();
+    const { t } = usePreferences();
 
     useEffect(() => {
         async function loadUsers() {
@@ -63,7 +54,7 @@ export function Users() {
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch {
-                const message = 'Não foi possível carregar os usuários.';
+                const message = t('users.loadError');
                 setError(message);
                 showToast({ message, type: 'error' });
             } finally {
@@ -72,7 +63,7 @@ export function Users() {
         }
 
         loadUsers();
-    }, [page, showToast]);
+    }, [page, showToast, t]);
 
     async function handleSaveUser(data: UserFormData) {
         try {
@@ -81,16 +72,16 @@ export function Users() {
                 setUsers((currentUsers) =>
                     currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
                 );
-                showToast({ message: 'Usuário atualizado com sucesso.', type: 'success' });
+                showToast({ message: t('users.userUpdated'), type: 'success' });
                 return;
             }
 
             const newUser = await createUser(data);
             setUsers((currentUsers) => [...currentUsers, newUser]);
-            showToast({ message: 'Usuário criado com sucesso.', type: 'success' });
+            showToast({ message: t('users.userCreated'), type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, 'Não foi possível salvar o usuário.'),
+                message: getApiError(requestError, t('users.saveError')),
                 type: 'error',
             });
             throw requestError;
@@ -121,7 +112,7 @@ export function Users() {
                         user.id === userToToggle.id ? { ...user, active: false } : user
                     )
                 );
-                showToast({ message: 'Usuário inativado com sucesso.', type: 'success' });
+                showToast({ message: t('users.deactivated'), type: 'success' });
                 return;
             }
 
@@ -129,14 +120,14 @@ export function Users() {
             setUsers((currentUsers) =>
                 currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
             );
-            showToast({ message: 'Usuário ativado com sucesso.', type: 'success' });
+            showToast({ message: t('users.activated'), type: 'success' });
         } catch (requestError) {
             showToast({
                 message: getApiError(
                     requestError,
                     userToToggle.active
-                        ? 'Não foi possível inativar o usuário.'
-                        : 'Não foi possível ativar o usuário.'
+                        ? t('users.deactivateError')
+                        : t('users.activateError')
                 ),
                 type: 'error',
             });
@@ -162,10 +153,10 @@ export function Users() {
             setUsers((currentUsers) =>
                 currentUsers.map((user) => user.id === updatedUser.id ? updatedUser : user)
             );
-            showToast({ message: approve ? 'Usuário aprovado com sucesso.' : 'Usuário recusado com sucesso.', type: 'success' });
+            showToast({ message: approve ? t('users.approvedSuccess') : t('users.rejectedSuccess'), type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, approve ? 'Não foi possível aprovar o usuário.' : 'Não foi possível recusar o usuário.'),
+                message: getApiError(requestError, approve ? t('users.approveError') : t('users.rejectError')),
                 type: 'error',
             });
         }
@@ -180,25 +171,25 @@ export function Users() {
                     type="button"
                     onClick={openCreateUserModal}
                 >
-                    Novo usuário
+                    {t('actions.newUser')}
                 </Button>
             </div>
 
             <DataTable
-                empty={isLoading ? 'Carregando usuários...' : error || 'Nenhum usuário encontrado.'}
+                empty={isLoading ? t('common.loading') : error || t('users.noResults')}
                 isEmpty={isLoading || Boolean(error) || users.length === 0}
                 tableClassName="users-table"
                 wrapperClassName="users-table-card"
             >
                 <thead>
                     <tr>
-                        <th>Nome</th>
-                        <th>Email</th>
-                        <th>Perfil</th>
-                        <th>Aprovação</th>
-                        <th>Status</th>
-                        <th>Criado em</th>
-                        <th>Ações</th>
+                        <th>{t('common.name')}</th>
+                        <th>{t('common.email')}</th>
+                        <th>{t('users.profile')}</th>
+                        <th>{t('users.approval')}</th>
+                        <th>{t('common.status')}</th>
+                        <th>{t('users.createdAt')}</th>
+                        <th>{t('patients.actions')}</th>
                     </tr>
                 </thead>
 
@@ -216,13 +207,13 @@ export function Users() {
                                     className={`user-role user-role--${user.role.toLowerCase()}`}
                                     tone={roleTones[user.role]}
                                 >
-                                    {roleLabels[user.role]}
+                                    {user.role === 'ADMIN' ? t('common.admin') : t('common.professional')}
                                 </Badge>
                             </td>
 
                             <td>
                                 <Badge tone={approvalTones[user.approvalStatus]}>
-                                    {approvalLabels[user.approvalStatus]}
+                                    {t(`users.${user.approvalStatus.toLowerCase()}`)}
                                 </Badge>
                             </td>
 
@@ -232,7 +223,7 @@ export function Users() {
                                         }`}
                                     tone={user.active ? 'success' : 'neutral'}
                                 >
-                                    {user.active ? 'Ativo' : 'Inativo'}
+                                    {user.active ? t('users.active') : t('users.inactive')}
                                 </Badge>
                             </td>
 
@@ -242,17 +233,17 @@ export function Users() {
                                 <div className="users-actions">
                                     {user.approvalStatus === 'PENDING' && (
                                         <>
-                                            <IconButton label="Aprovar usuário" onClick={() => handleApproval(user.id, true)}>
+                                            <IconButton label={t('users.approve')} onClick={() => handleApproval(user.id, true)}>
                                                 <Check size={18} />
                                             </IconButton>
-                                            <IconButton label="Recusar usuário" onClick={() => handleApproval(user.id, false)}>
+                                            <IconButton label={t('users.reject')} onClick={() => handleApproval(user.id, false)}>
                                                 <X size={18} />
                                             </IconButton>
                                         </>
                                     )}
                                     {user.active && (
                                         <IconButton
-                                            label="Editar usuário"
+                                            label={t('users.editTitle')}
                                             onClick={() => openEditUserModal(user)}
                                         >
                                             <Pencil size={18} />
@@ -260,7 +251,7 @@ export function Users() {
                                     )}
 
                                     <IconButton
-                                        label={user.active ? 'Inativar usuário' : 'Ativar usuário'}
+                                        label={user.active ? t('users.deactivate') : t('users.activate')}
                                         onClick={() => user.active ? requestUserDeactivation(user) : handleToggleUserActive(user)}
                                     >
                                         <Power size={18} />
@@ -286,27 +277,27 @@ export function Users() {
                 className="user-deactivation-modal"
                 isOpen={Boolean(userPendingDeactivation)}
                 onClose={() => setUserPendingDeactivation(null)}
-                title="Inativar usuário"
+                title={t('users.deactivateTitle')}
             >
                 <div className="user-deactivation-modal__content">
                     <p>
-                        Tem certeza que deseja inativar
+                        {t('users.confirmDeactivateQuestion')}
                         {' '}
                         <strong>{userPendingDeactivation?.name}</strong>?
                     </p>
 
                     <p>
-                        Esse usuário não conseguirá acessar o sistema até ser ativado novamente.
+                        {t('users.confirmDeactivate')}
                     </p>
                 </div>
 
                 <div className="user-deactivation-modal__actions">
                     <Button variant="secondary" onClick={() => setUserPendingDeactivation(null)}>
-                        Cancelar
+                        {t('actions.cancel')}
                     </Button>
 
                     <Button variant="danger" onClick={confirmUserDeactivation}>
-                        Sim, inativar
+                        {t('users.deactivate')}
                     </Button>
                 </div>
             </Modal>

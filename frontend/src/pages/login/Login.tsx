@@ -7,11 +7,14 @@ import { Button, Card, FormField } from '../../components/UI';
 import { useAuth } from '../../hooks/useAuth';
 import { getApiError } from '../../services/api';
 import { useToast } from '../../hooks/useToast';
+import { usePreferences } from '../../hooks/usePreferences';
+import { PreferencesControls } from '../../components/PreferencesControls/PreferencesControls';
 
 export function Login() {
     const navigate = useNavigate();
     const { login } = useAuth();
     const { showToast } = useToast();
+    const { t } = usePreferences();
 
     const [email, setEmail] = useState('admin@clinicare.local');
     const [password, setPassword] = useState('admin123');
@@ -25,7 +28,7 @@ export function Login() {
             await login({ email, password });
             navigate('/dashboard');
         } catch (requestError) {
-            const message = getApiError(requestError, 'E-mail ou senha inválidos.');
+            const message = getApiError(requestError, t('auth.loginError'));
             setError(message);
             showToast({ message, type: 'error' });
         }
@@ -33,6 +36,7 @@ export function Login() {
 
     return (
         <main className="login-page">
+            <PreferencesControls />
             <section className="login-container">
                 <div className="login-brand">
                     <div className="login-brand__icon">
@@ -40,21 +44,21 @@ export function Login() {
                     </div>
 
                     <h1>CliniCare</h1>
-                    <p>Acompanhamento clínico inteligente de pacientes</p>
+                    <p>{t('auth.tagline')}</p>
                 </div>
 
                 <Card as="form" className="login-card" onSubmit={handleSubmit}>
                     <div className="login-card__header">
-                        <h2>Entrar</h2>
-                        <p>Acesse sua conta para continuar</p>
+                        <h2>{t('auth.login')}</h2>
+                        <p>{t('auth.loginSubtitle')}</p>
                     </div>
 
                     <FormField
                         htmlFor="email"
-                        label="Email"
+                        label={t('auth.email')}
                         controlProps={{
                             onChange: (event) => setEmail(event.target.value),
-                            placeholder: 'Digite seu email',
+                            placeholder: t('auth.placeholderEmail'),
                             type: 'email',
                             value: email,
                         }}
@@ -62,24 +66,24 @@ export function Login() {
 
                     <FormField
                         htmlFor="password"
-                        label="Senha"
+                        label={t('auth.password')}
                         controlProps={{
                             onChange: (event) => setPassword(event.target.value),
-                            placeholder: 'Digite sua senha',
+                            placeholder: t('auth.placeholderPassword'),
                             type: 'password',
                             value: password,
                         }}
                     />
 
                     <Button className="login-button" fullWidth type="submit">
-                        Entrar
+                        {t('auth.login')}
                     </Button>
 
                     {error && <p className="login-error">{error}</p>}
 
                     <div className="login-links">
-                        <Link to="/forgot-password">Esqueci minha senha</Link>
-                        <span>Não possui uma conta? <Link to="/register">Criar conta</Link></span>
+                        <Link to="/forgot-password">{t('auth.forgotPassword')}</Link>
+                        <span>{t('auth.noAccount')} <Link to="/register">{t('actions.createAccount')}</Link></span>
                     </div>
                 </Card>
             </section>

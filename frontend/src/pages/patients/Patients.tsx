@@ -11,13 +11,7 @@ import { createPatient, getPatients, updatePatient } from '../../services/patien
 import { getApiError } from '../../services/api';
 import { formatCpf, formatDate } from '../../utils/formatters';
 import { useToast } from '../../hooks/useToast';
-
-const statusLabels: Record<PatientStatus, string> = {
-    IN_FOLLOW_UP: 'Em acompanhamento',
-    URGENT: 'Urgente',
-    DISCHARGED: 'Alta',
-    PAUSED: 'Pausado',
-};
+import { usePreferences } from '../../hooks/usePreferences';
 
 const statusTones: Record<PatientStatus, 'cyan' | 'danger' | 'success' | 'neutral'> = {
     IN_FOLLOW_UP: 'cyan',
@@ -39,6 +33,7 @@ export function Patients() {
     const [totalElements, setTotalElements] = useState(0);
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = usePreferences();
 
     useEffect(() => {
         async function loadPatients() {
@@ -55,7 +50,7 @@ export function Patients() {
                 setTotalPages(response.totalPages);
                 setTotalElements(response.totalElements);
             } catch {
-                const message = 'Não foi possível carregar os pacientes.';
+                const message = t('patients.loadError');
                 setError(message);
                 showToast({ message, type: 'error' });
             } finally {
@@ -64,7 +59,7 @@ export function Patients() {
         }
 
         loadPatients();
-    }, [page, search, showToast, status]);
+    }, [page, search, showToast, status, t]);
 
     async function handleSavePatient(data: PatientFormData) {
         try {
@@ -75,16 +70,16 @@ export function Patients() {
                         patient.id === updatedPatient.id ? updatedPatient : patient
                     )
                 );
-                showToast({ message: 'Paciente atualizado com sucesso.', type: 'success' });
+                showToast({ message: t('patients.patientUpdated'), type: 'success' });
                 return;
             }
 
             const newPatient = await createPatient(data);
             setPatients((currentPatients) => [newPatient, ...currentPatients]);
-            showToast({ message: 'Paciente criado com sucesso.', type: 'success' });
+            showToast({ message: t('patients.patientCreated'), type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, 'Não foi possível salvar o paciente.'),
+                message: getApiError(requestError, t('patients.saveError')),
                 type: 'error',
             });
             throw requestError;
@@ -124,7 +119,7 @@ export function Patients() {
                     <Search size={20} />
                     <input
                         type="text"
-                        placeholder="Buscar por nome..."
+                        placeholder={t('patients.searchByName')}
                         value={search}
                         onChange={(event) => {
                             setSearch(event.target.value);
@@ -141,11 +136,11 @@ export function Patients() {
                         setPage(0);
                     }}
                 >
-                    <option value="ALL">Todos os status</option>
-                    <option value="IN_FOLLOW_UP">Em acompanhamento</option>
-                    <option value="URGENT">Urgente</option>
-                    <option value="DISCHARGED">Alta</option>
-                    <option value="PAUSED">Pausado</option>
+                    <option value="ALL">{t('patients.allStatuses')}</option>
+                    <option value="IN_FOLLOW_UP">{t('status.IN_FOLLOW_UP')}</option>
+                    <option value="URGENT">{t('status.URGENT')}</option>
+                    <option value="DISCHARGED">{t('status.DISCHARGED')}</option>
+                    <option value="PAUSED">{t('status.PAUSED')}</option>
                 </select>
 
                 <Button
@@ -154,12 +149,12 @@ export function Patients() {
                     type="button"
                     onClick={openCreatePatientModal}
                 >
-                    Novo paciente
+                    {t('actions.newPatient')}
                 </Button>
             </section>
 
             <DataTable
-                empty={isLoading ? 'Carregando pacientes...' : error || 'Nenhum paciente encontrado.'}
+                empty={isLoading ? t('common.loadingPatients') : error || t('patients.noResults')}
                 isEmpty={isLoading || Boolean(error) || patients.length === 0}
                 minWidth={1000}
                 tableClassName="patients-table"
@@ -167,14 +162,14 @@ export function Patients() {
             >
                 <thead>
                     <tr>
-                        <th>Nome</th>
+                        <th>{t('patients.name')}</th>
                         <th>CPF</th>
-                        <th>Nascimento</th>
-                        <th>Telefone</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Cadastro</th>
-                        <th>Ações</th>
+                        <th>{t('patients.birthDate')}</th>
+                        <th>{t('patients.phone')}</th>
+                        <th>{t('common.email')}</th>
+                        <th>{t('patients.status')}</th>
+                        <th>{t('patients.createdAt')}</th>
+                        <th>{t('patients.actions')}</th>
                     </tr>
                 </thead>
 
@@ -182,7 +177,7 @@ export function Patients() {
                     {patients.map((patient) => (
                         <tr
                             key={patient.id}
-                            aria-label={`Abrir detalhes de ${patient.name}`}
+                            aria-label={`${t('patients.openDetails')} ${patient.name}`}
                             className="patients-table-row"
                             onClick={() => openPatientDetails(patient.id)}
                             onKeyDown={(event) => handlePatientRowKeyDown(event, patient.id)}
@@ -200,7 +195,7 @@ export function Patients() {
 
                             <td>
                                 <Badge tone={statusTones[patient.status]}>
-                                    {statusLabels[patient.status]}
+                                    {t(`status.${patient.status}`)}
                                 </Badge>
                             </td>
 
@@ -209,7 +204,7 @@ export function Patients() {
                             <td>
                                 <div className="patients-actions">
                                     <IconButton
-                                        label="Editar paciente"
+                                        label={t('actions.editPatient')}
                                         onClick={(event) => {
                                             event.stopPropagation();
                                             openEditPatientModal(patient);

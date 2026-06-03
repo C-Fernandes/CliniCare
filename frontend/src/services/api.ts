@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { ApiResponse } from '../types/api';
 import { AUTH_STORAGE_KEY } from '../contexts/auth-context';
+import i18n from '../i18n';
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL ?? '/api',
@@ -28,7 +29,7 @@ api.interceptors.response.use(
 
             if (!error.config?.url?.includes('/auth/login')) {
                 window.dispatchEvent(new CustomEvent('clinicare:toast', {
-                    detail: { message: 'Sua sessão expirou. Faça login novamente.', type: 'error' },
+                    detail: { message: i18n.t('errors.expiredSession'), type: 'error' },
                 }));
                 window.setTimeout(() => window.location.assign('/login'), 600);
             }
@@ -54,19 +55,19 @@ export function getApiError(error: unknown, fallback: string) {
 
     if (!candidate || isTechnicalErrorMessage(candidate)) {
         if (status === 401) {
-            return 'Sua sessão expirou. Faça login novamente.';
+            return i18n.t('errors.expiredSession');
         }
 
         if (status === 403) {
-            return 'Você não tem permissão para realizar esta ação.';
+            return i18n.t('errors.forbidden');
         }
 
         if (status === 404) {
-            return 'Registro não encontrado.';
+            return i18n.t('errors.notFound');
         }
 
         if (status && status >= 500) {
-            return 'Não foi possível concluir a ação agora. Tente novamente em instantes.';
+            return i18n.t('errors.generic');
         }
 
         return fallback;

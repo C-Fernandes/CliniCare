@@ -5,20 +5,16 @@ interface NotificationItemProps {
     onClick: () => void;
     patient: string;
     priority: string;
+    priorityTone: 'success' | 'warning' | 'danger';
     title: string;
 }
-
-const priorityTones: Record<string, 'success' | 'warning' | 'danger'> = {
-    Baixa: 'success',
-    Média: 'warning',
-    Alta: 'danger',
-};
 
 export function NotificationItem({
     date,
     onClick,
     patient,
     priority,
+    priorityTone,
     title,
 }: NotificationItemProps) {
     return (
@@ -29,7 +25,7 @@ export function NotificationItem({
                     <strong>{title}</strong>
                 </div>
 
-                <Badge tone={priorityTones[priority]}>{priority}</Badge>
+                <Badge tone={priorityTone}>{priority}</Badge>
             </div>
 
             <p>

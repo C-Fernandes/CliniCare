@@ -3,6 +3,7 @@ import { useState } from 'react';
 import './UserModal.scss';
 import { Button, FormField, Modal } from '../UI';
 import type { User, UserFormData, UserRole } from '../../types/user';
+import { usePreferences } from '../../hooks/usePreferences';
 
 interface UserModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface UserModalProps {
 }
 
 export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps) {
+    const { t } = usePreferences();
     const [name, setName] = useState(user?.name ?? '');
     const [email, setEmail] = useState(user?.email ?? '');
     const [password, setPassword] = useState('');
@@ -54,12 +56,12 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
             isOpen={isOpen}
             onClose={handleClose}
             overlayClassName="user-modal-overlay"
-            title={user ? 'Editar usuário' : 'Novo usuário'}
+            title={user ? t('users.editTitle') : t('users.newTitle')}
         >
             <form onSubmit={handleSubmit}>
                 <FormField
                     htmlFor="name"
-                    label="Nome"
+                    label={t('common.name')}
                     controlProps={{
                         autoFocus: true,
                         onChange: (event) => setName(event.target.value),
@@ -71,7 +73,7 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
 
                 <FormField
                     htmlFor="email"
-                    label="Email"
+                    label={t('common.email')}
                     controlProps={{
                         onChange: (event) => setEmail(event.target.value),
                         required: true,
@@ -83,7 +85,7 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
                 {!user && (
                     <FormField
                         htmlFor="password"
-                        label="Senha"
+                        label={t('auth.password')}
                         controlProps={{
                             onChange: (event) => setPassword(event.target.value),
                             required: true,
@@ -95,13 +97,13 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
 
                 <FormField
                     htmlFor="role"
-                    label="Perfil"
+                    label={t('users.profile')}
                     controlProps={{
                         as: 'select',
                         children: (
                             <>
-                                <option value="PROFESSIONAL">Profissional</option>
-                                <option value="ADMIN">Administrador</option>
+                                <option value="PROFESSIONAL">{t('common.professional')}</option>
+                                <option value="ADMIN">{t('common.admin')}</option>
                             </>
                         ),
                         onChange: (event) => setRole(event.target.value as UserRole),
@@ -111,10 +113,10 @@ export function UserModal({ isOpen, onClose, onSaveUser, user }: UserModalProps)
 
                 <div className="user-modal__actions">
                     <Button variant="secondary" onClick={handleClose}>
-                        Cancelar
+                        {t('actions.cancel')}
                     </Button>
 
-                    <Button type="submit">{user ? 'Salvar usuário' : 'Criar usuário'}</Button>
+                    <Button type="submit">{user ? t('actions.saveUser') : t('actions.createUser')}</Button>
                 </div>
             </form>
         </Modal>

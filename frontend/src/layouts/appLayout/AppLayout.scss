@@ -31,25 +31,48 @@
   gap: var(--space-7);
 }
 
-.topbar__notification {
-  border: none;
-  background: transparent;
+.topbar__preferences {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.topbar__icon-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   color: var(--color-muted-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
 
-  span {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 18px;
-    height: 18px;
-    border-radius: 999px;
-    background: #ef4444;
-    color: var(--color-surface);
-    font-size: var(--font-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  &:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-primary);
+  }
+}
+
+.topbar__language {
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-muted-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+
+  select {
+    border: none;
+    background: transparent;
+    color: var(--color-text);
+    outline: none;
+    font-weight: 700;
+    cursor: pointer;
   }
 }
 
@@ -96,5 +119,9 @@
 
   .topbar__user div {
     display: none;
+  }
+
+  .topbar__actions {
+    gap: var(--space-3);
   }
 }

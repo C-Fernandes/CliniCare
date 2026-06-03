@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../login/Login.scss';
 import './PendingApproval.scss';
 import { Button, Card } from '../../components/UI';
+import { usePreferences } from '../../hooks/usePreferences';
+import { PreferencesControls } from '../../components/PreferencesControls/PreferencesControls';
 
 interface PendingApprovalState {
     email?: string;
@@ -13,14 +15,16 @@ export function PendingApproval() {
     const navigate = useNavigate();
     const location = useLocation();
     const state = location.state as PendingApprovalState | null;
+    const { t } = usePreferences();
 
     return (
         <main className="login-page">
+            <PreferencesControls />
             <section className="login-container pending-approval">
                 <div className="login-brand">
                     <div className="login-brand__icon"><ShieldCheck size={32} /></div>
                     <h1>CliniCare</h1>
-                    <p>Conta em análise</p>
+                    <p>{t('pendingApproval.accountReview')}</p>
                 </div>
 
                 <Card className="login-card pending-approval-card">
@@ -29,22 +33,22 @@ export function PendingApproval() {
                     </div>
 
                     <div className="login-card__header">
-                        <h2>Aguardando aprovação</h2>
+                        <h2>{t('pendingApproval.approvalTitle')}</h2>
                         <p>
-                            Sua conta foi criada com sucesso e está aguardando aprovação de um administrador.
+                            {t('pendingApproval.description')}
                         </p>
                     </div>
 
                     {state?.email && (
                         <p className="pending-approval-card__email">
-                            Solicitação enviada para <strong>{state.email}</strong>.
+                            {t('pendingApproval.emailSentTo')} <strong>{state.email}</strong>.
                         </p>
                     )}
 
                     <div className="pending-approval-card__notice">
                         <ShieldCheck size={20} />
                         <p>
-                            Assim que sua conta for aprovada, você receberá um e-mail e poderá acessar o sistema.
+                            {t('pendingApproval.nextSteps')}
                         </p>
                     </div>
 
@@ -54,7 +58,7 @@ export function PendingApproval() {
                         icon={<LogIn size={18} />}
                         onClick={() => navigate('/login')}
                     >
-                        Voltar para o login
+                        {t('actions.back')}
                     </Button>
                 </Card>
             </section>

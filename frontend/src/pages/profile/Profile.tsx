@@ -4,17 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import './Profile.scss';
 import { Badge, Button, Card } from '../../components/UI';
 import { useAuth } from '../../hooks/useAuth';
-
-const roleLabels = {
-    ADMIN: 'Administrador',
-    PROFESSIONAL: 'Profissional',
-};
+import { usePreferences } from '../../hooks/usePreferences';
 
 export function Profile() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { t } = usePreferences();
 
-    const initials = (user?.name ?? 'Usuário')
+    const initials = (user?.name ?? t('common.professional'))
         .split(' ')
         .slice(0, 2)
         .map((part: string) => part[0])
@@ -35,25 +32,25 @@ export function Profile() {
                     <div>
                         <h2>{user?.name}</h2>
                         <Badge className="profile-role-badge" tone="primary">
-                            {user ? roleLabels[user.role] : ''}
+                            {user ? user.role === 'ADMIN' ? t('common.admin') : t('common.professional') : ''}
                         </Badge>
                     </div>
                 </div>
 
                 <div className="profile-info">
                     <div className="profile-info__item">
-                        <span>Email</span>
+                        <span>{t('common.email')}</span>
                         <strong>{user?.email}</strong>
                     </div>
 
                     <div className="profile-info__item">
-                        <span>Perfil</span>
-                        <strong>{user ? roleLabels[user.role] : ''}</strong>
+                        <span>{t('users.profile')}</span>
+                        <strong>{user ? user.role === 'ADMIN' ? t('common.admin') : t('common.professional') : ''}</strong>
                     </div>
 
                     <div className="profile-info__item">
-                        <span>Status</span>
-                        <strong>Ativo</strong>
+                        <span>{t('common.status')}</span>
+                        <strong>{t('users.active')}</strong>
                     </div>
                 </div>
 
@@ -64,7 +61,7 @@ export function Profile() {
                         type="button"
                         variant="danger"
                     >
-                        Sair
+                        {t('actions.logout')}
                     </Button>
                 </div>
             </Card>

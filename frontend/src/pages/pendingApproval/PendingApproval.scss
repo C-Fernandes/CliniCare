@@ -10,8 +10,8 @@
     height: 70px;
     margin: 0 auto var(--space-6);
     border-radius: 50%;
-    background: #fff4d6;
-    color: #8a5a00;
+    background: var(--color-warning-soft);
+    color: var(--color-warning);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,9 +30,9 @@
     text-align: left;
     margin: var(--space-5) 0;
     padding: var(--space-4);
-    border: 1px solid #bfdbfe;
+    border: 1px solid var(--color-border-primary-soft);
     border-radius: var(--radius-lg);
-    background: #eff6ff;
+    background: var(--color-primary-soft);
     color: var(--color-muted);
 
     svg {

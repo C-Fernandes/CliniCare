@@ -20,17 +20,19 @@ import type { ClinicalEvolution } from '../../types/clinicalEvolution';
 import type { Notification } from '../../types/notification';
 import type { Patient } from '../../types/patient';
 import { formatDateTime } from '../../utils/formatters';
+import { usePreferences } from '../../hooks/usePreferences';
+import { getNotificationText } from '../../utils/notificationText';
 
-const attentionLabels = {
-    LOW: 'Baixo',
-    MEDIUM: 'Médio',
-    HIGH: 'Alto',
+const attentionTones = {
+    LOW: 'success',
+    MEDIUM: 'warning',
+    HIGH: 'danger',
 } as const;
 
-const priorityLabels = {
-    LOW: 'Baixa',
-    MEDIUM: 'Média',
-    HIGH: 'Alta',
+const priorityTones = {
+    LOW: 'success',
+    MEDIUM: 'warning',
+    HIGH: 'danger',
 } as const;
 
 export function Dashboard() {
@@ -39,6 +41,7 @@ export function Dashboard() {
     const [evolutions, setEvolutions] = useState<ClinicalEvolution[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const { showToast } = useToast();
+    const { t } = usePreferences();
 
     useEffect(() => {
         async function loadDashboard() {
@@ -53,12 +56,12 @@ export function Dashboard() {
                 setEvolutions(evolutionsResponse.content);
                 setNotifications(notificationsResponse.content);
             } catch {
-                showToast({ message: 'Não foi possível carregar os dados do dashboard.', type: 'error' });
+                showToast({ message: t('dashboard.loadError'), type: 'error' });
             }
         }
 
         loadDashboard();
-    }, [showToast]);
+    }, [showToast, t]);
 
     const activePatients = useMemo(
         () => patients.filter((patient) => patient.active && patient.status === 'IN_FOLLOW_UP').length,
@@ -73,41 +76,48 @@ export function Dashboard() {
     return (
         <div className="dashboard">
             <section className="dashboard__cards">
-                <StatCard icon={<UsersRound size={22} />} label="Total de pacientes" tone="blue" value={String(patients.length)} />
-                <StatCard icon={<UserCheck size={22} />} label="Pacientes ativos" tone="green" value={String(activePatients)} />
-                <StatCard icon={<ClipboardList size={22} />} label="Evoluções no mês" tone="cyan" value={String(evolutions.length)} />
-                <StatCard icon={<Bell size={22} />} label="Notificações não lidas" tone="red" value={String(unreadNotifications)} />
+                <StatCard icon={<UsersRound size={22} />} label={t('dashboard.totalPatients')} tone="blue" value={String(patients.length)} />
+                <StatCard icon={<UserCheck size={22} />} label={t('dashboard.activePatients')} tone="green" value={String(activePatients)} />
+                <StatCard icon={<ClipboardList size={22} />} label={t('dashboard.evolutionsThisMonth')} tone="cyan" value={String(evolutions.length)} />
+                <StatCard icon={<Bell size={22} />} label={t('dashboard.unreadNotifications')} tone="red" value={String(unreadNotifications)} />
             </section>
 
             <section className="dashboard__content">
-                <DashboardPanel title="Últimas evoluções clínicas">
+                <DashboardPanel title={t('dashboard.recentEvolutions')}>
                     <div className="evolution-list">
                         {evolutions.slice(0, 4).map((evolution) => (
                             <EvolutionItem
-                                attention={attentionLabels[evolution.attentionLevel]}
+                                attention={t(`priority.${evolution.attentionLevel}`)}
+                                attentionLabel={t('evolution.attention')}
+                                attentionTone={attentionTones[evolution.attentionLevel]}
                                 date={formatDateTime(evolution.evolutionDate)}
                                 key={evolution.id}
                                 onClick={() => navigate(`/patients/${evolution.patientId}`)}
                                 patient={evolution.patientName}
-                                professional={evolution.professionalName ?? 'Sem profissional'}
+                                professional={evolution.professionalName ?? t('common.noProfessional')}
                                 summary={evolution.summary || evolution.description}
                             />
                         ))}
                     </div>
                 </DashboardPanel>
 
-                <DashboardPanel title="Notificações recentes">
+                <DashboardPanel title={t('dashboard.recentNotifications')}>
                     <div className="notification-list">
-                        {notifications.slice(0, 4).map((notification) => (
-                            <NotificationItem
-                                date={formatDateTime(notification.createdAt)}
-                                key={notification.id}
-                                onClick={() => navigate(notification.patientId ? `/patients/${notification.patientId}` : '/notifications')}
-                                patient={notification.patientName ?? 'Sem paciente'}
-                                priority={priorityLabels[notification.priority]}
-                                title={notification.title}
-                            />
-                        ))}
+                        {notifications.slice(0, 4).map((notification) => {
+                            const notificationText = getNotificationText(notification, t);
+
+                            return (
+                                <NotificationItem
+                                    date={formatDateTime(notification.createdAt)}
+                                    key={notification.id}
+                                    onClick={() => navigate(notification.patientId ? `/patients/${notification.patientId}` : '/notifications')}
+                                    patient={notification.patientName ?? t('common.noPatient')}
+                                    priority={t(`priority.${notification.priority}`)}
+                                    priorityTone={priorityTones[notification.priority]}
+                                    title={notificationText.title}
+                                />
+                            );
+                        })}
                     </div>
                 </DashboardPanel>
             </section>

@@ -4,6 +4,7 @@ import './PatientModal.scss';
 import { Button, FormField, Modal } from '../UI';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { formatCpf, onlyDigits } from '../../utils/formatters';
+import { usePreferences } from '../../hooks/usePreferences';
 
 interface PatientModalProps {
     isOpen: boolean;
@@ -18,6 +19,7 @@ export function PatientModal({
     onSavePatient,
     patient,
 }: PatientModalProps) {
+    const { t } = usePreferences();
     const [name, setName] = useState(patient?.name ?? '');
     const [cpf, setCpf] = useState(formatCpf(patient?.cpf));
     const [birthDate, setBirthDate] = useState(patient?.birthDate ?? '');
@@ -69,14 +71,14 @@ export function PatientModal({
             isOpen={isOpen}
             onClose={handleClose}
             overlayClassName="patient-modal-overlay"
-            title={patient ? 'Editar paciente' : 'Novo paciente'}
+            title={patient ? t('patients.editTitle') : t('patients.newTitle')}
             size="lg"
         >
             <form onSubmit={handleSubmit}>
                 <FormField
                     fullWidth
                     htmlFor="patient-name"
-                    label="Nome completo *"
+                    label={`${t('common.fullName')} *`}
                     controlProps={{
                         autoFocus: true,
                         onChange: (event) => setName(event.target.value),
@@ -103,7 +105,7 @@ export function PatientModal({
 
                     <FormField
                         htmlFor="patient-birth-date"
-                        label="Data de nascimento *"
+                        label={`${t('patients.birthDate')} *`}
                         controlProps={{
                             onChange: (event) => setBirthDate(event.target.value),
                             required: true,
@@ -114,7 +116,7 @@ export function PatientModal({
 
                     <FormField
                         htmlFor="patient-phone"
-                        label="Telefone"
+                        label={t('patients.phone')}
                         controlProps={{
                             onChange: (event) => setPhone(event.target.value),
                             placeholder: '(00) 00000-0000',
@@ -125,7 +127,7 @@ export function PatientModal({
 
                     <FormField
                         htmlFor="patient-email"
-                        label="Email"
+                        label={t('common.email')}
                         controlProps={{
                             onChange: (event) => setEmail(event.target.value),
                             type: 'email',
@@ -137,15 +139,15 @@ export function PatientModal({
                 <FormField
                     fullWidth
                     htmlFor="patient-status"
-                    label="Status"
+                    label={t('patients.status')}
                     controlProps={{
                         as: 'select',
                         children: (
                             <>
-                                <option value="IN_FOLLOW_UP">Em acompanhamento</option>
-                                <option value="URGENT">Urgente</option>
-                                <option value="DISCHARGED">Alta</option>
-                                <option value="PAUSED">Pausado</option>
+                                <option value="IN_FOLLOW_UP">{t('status.IN_FOLLOW_UP')}</option>
+                                <option value="URGENT">{t('status.URGENT')}</option>
+                                <option value="DISCHARGED">{t('status.DISCHARGED')}</option>
+                                <option value="PAUSED">{t('status.PAUSED')}</option>
                             </>
                         ),
                         onChange: (event) => setStatus(event.target.value as PatientStatus),
@@ -156,7 +158,7 @@ export function PatientModal({
                 <FormField
                     fullWidth
                     htmlFor="patient-notes"
-                    label="Observações"
+                    label={t('patients.notes')}
                     controlProps={{
                         as: 'textarea',
                         onChange: (event) => setNotes(event.target.value),
@@ -167,10 +169,10 @@ export function PatientModal({
 
                 <div className="patient-modal__actions">
                     <Button variant="secondary" onClick={handleClose}>
-                        Cancelar
+                        {t('actions.cancel')}
                     </Button>
 
-                    <Button type="submit">Salvar paciente</Button>
+                    <Button type="submit">{t('actions.savePatient')}</Button>
                 </div>
             </form>
         </Modal>

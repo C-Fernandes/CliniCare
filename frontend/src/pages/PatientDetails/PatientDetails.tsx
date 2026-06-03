@@ -19,19 +19,7 @@ import type { ClinicalEvolutionFormData } from '../../types/clinicalEvolution';
 import type { Patient, PatientFormData, PatientStatus } from '../../types/patient';
 import { formatCpf, formatDate, formatDateTime } from '../../utils/formatters';
 import { useToast } from '../../hooks/useToast';
-
-const statusLabels: Record<PatientStatus, string> = {
-    IN_FOLLOW_UP: 'Em acompanhamento',
-    URGENT: 'Urgente',
-    DISCHARGED: 'Alta',
-    PAUSED: 'Pausado',
-};
-
-const attentionLabels: Record<AttentionLevel, string> = {
-    LOW: 'Baixo',
-    MEDIUM: 'Médio',
-    HIGH: 'Alto',
-};
+import { usePreferences } from '../../hooks/usePreferences';
 
 const statusTones: Record<PatientStatus, 'cyan' | 'danger' | 'success' | 'neutral'> = {
     IN_FOLLOW_UP: 'cyan',
@@ -63,6 +51,7 @@ export function PatientDetails() {
     const [historyTotalPages, setHistoryTotalPages] = useState(0);
     const [historyTotalElements, setHistoryTotalElements] = useState(0);
     const { showToast } = useToast();
+    const { t } = usePreferences();
 
     useEffect(() => {
         async function loadPatientDetails() {
@@ -80,7 +69,7 @@ export function PatientDetails() {
                 setHistoryTotalPages(evolutionsResponse.totalPages);
                 setHistoryTotalElements(evolutionsResponse.totalElements);
             } catch {
-                const message = 'Paciente não encontrado';
+                const message = t('patients.detailsNotFound');
                 setError(message);
                 showToast({ message, type: 'error' });
             } finally {
@@ -89,7 +78,7 @@ export function PatientDetails() {
         }
 
         loadPatientDetails();
-    }, [historyPage, patientId, showToast]);
+    }, [historyPage, patientId, showToast, t]);
 
     async function handleCreateEvolution(data: ClinicalEvolutionFormData) {
         try {
@@ -99,10 +88,10 @@ export function PatientDetails() {
             });
 
             setPatientEvolutions((currentEvolutions) => [newEvolution, ...currentEvolutions]);
-            showToast({ message: 'Evolução clínica criada com sucesso.', type: 'success' });
+            showToast({ message: t('patients.evolutionCreated'), type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, 'Não foi possível criar a evolução clínica.'),
+                message: getApiError(requestError, t('patients.evolutionCreateError')),
                 type: 'error',
             });
             throw requestError;
@@ -113,10 +102,10 @@ export function PatientDetails() {
         try {
             const updatedPatient = await updatePatient(patientId, data);
             setPatient(updatedPatient);
-            showToast({ message: 'Paciente atualizado com sucesso.', type: 'success' });
+            showToast({ message: t('patients.patientUpdated'), type: 'success' });
         } catch (requestError) {
             showToast({
-                message: getApiError(requestError, 'Não foi possível atualizar o paciente.'),
+                message: getApiError(requestError, t('patients.patientUpdateError')),
                 type: 'error',
             });
             throw requestError;
@@ -128,9 +117,9 @@ export function PatientDetails() {
             setIsGeneratingSummary(true);
             setSummaryError('');
             setPatientSummary(await summarizePatient(patientId));
-            showToast({ message: 'Resumo geral gerado com sucesso.', type: 'success' });
+            showToast({ message: t('patients.generalSummarySuccess'), type: 'success' });
         } catch (requestError) {
-            const message = getApiError(requestError, 'Não foi possível gerar o resumo geral.');
+            const message = getApiError(requestError, t('patients.generalSummaryError'));
             setSummaryError(message);
             showToast({ message, type: 'error' });
         } finally {
@@ -147,11 +136,11 @@ export function PatientDetails() {
                     onClick={() => navigate('/patients')}
                 >
                     <ArrowLeft size={18} />
-                    Pacientes
+                    {t('nav.patients')}
                 </button>
 
                 <Card className="patient-details-card">
-                    <h2>{isLoading ? 'Carregando paciente...' : error || 'Paciente não encontrado'}</h2>
+                    <h2>{isLoading ? t('patients.loadingDetails') : error || t('patients.detailsNotFound')}</h2>
                 </Card>
             </div>
         );
@@ -165,7 +154,7 @@ export function PatientDetails() {
                 onClick={() => navigate('/patients')}
             >
                 <ArrowLeft size={18} />
-                Pacientes
+                {t('nav.patients')}
             </button>
 
             <Card className="patient-details-card">
@@ -177,7 +166,7 @@ export function PatientDetails() {
                             className={`patient-status patient-status--${patient.status.toLowerCase()}`}
                             tone={statusTones[patient.status]}
                         >
-                            {statusLabels[patient.status]}
+                            {t(`status.${patient.status}`)}
                         </Badge>
                     </div>
 
@@ -188,24 +177,24 @@ export function PatientDetails() {
                         </div>
 
                         <div>
-                            <span>Data de nascimento</span>
+                            <span>{t('patients.birthDate')}</span>
                             <strong>{formatDate(patient.birthDate)}</strong>
                         </div>
 
                         <div>
-                            <span>Telefone</span>
+                            <span>{t('patients.phone')}</span>
                             <strong>{patient.phone}</strong>
                         </div>
 
                         <div>
-                            <span>Email</span>
+                            <span>{t('common.email')}</span>
                             <strong>{patient.email}</strong>
                         </div>
                     </div>
 
                     <div className="patient-details-notes">
-                        <span>Observações</span>
-                        <p>{patient.notes || 'Nenhuma observação registrada.'}</p>
+                        <span>{t('patients.notes')}</span>
+                        <p>{patient.notes || t('patients.noNotes')}</p>
                     </div>
                 </div>
 
@@ -216,7 +205,7 @@ export function PatientDetails() {
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
                     >
-                        {isGeneratingSummary ? 'Gerando resumo...' : 'Resumo geral com IA'}
+                        {isGeneratingSummary ? t('actions.generatingSummary') : t('actions.generateAiSummary')}
                     </Button>
 
                     <Button
@@ -225,7 +214,7 @@ export function PatientDetails() {
                         variant="secondary"
                         onClick={() => setIsPatientModalOpen(true)}
                     >
-                        Editar paciente
+                        {t('actions.editPatient')}
                     </Button>
 
                     <Button
@@ -233,7 +222,7 @@ export function PatientDetails() {
                         icon={<Plus size={18} />}
                         onClick={() => setIsEvolutionModalOpen(true)}
                     >
-                        Nova evolução clínica
+                        {t('actions.newEvolution')}
                     </Button>
                 </div>
             </Card>
@@ -242,13 +231,13 @@ export function PatientDetails() {
                 <Card className="patient-ai-summary-card">
                     <div className="patient-ai-summary-card__header">
                         <div>
-                            <h2>Resumo geral com Gemini</h2>
-                            <p>Conteúdo de apoio. Revise as informações antes de tomar decisões clínicas.</p>
+                            <h2>{t('patients.geminiSummary')}</h2>
+                            <p>{t('patients.geminiSummaryReview')}</p>
                         </div>
 
                         {patientSummary && (
                             <Badge tone={attentionTones[patientSummary.suggestedAttentionLevel]}>
-                                Atenção sugerida: {attentionLabels[patientSummary.suggestedAttentionLevel]}
+                                {t('patients.suggestedAttention')}: {t(`priority.${patientSummary.suggestedAttentionLevel}`)}
                             </Badge>
                         )}
                     </div>
@@ -258,17 +247,17 @@ export function PatientDetails() {
                     ) : (
                         <>
                             <p>{patientSummary?.summary}</p>
-                            <strong>Justificativa para revisão profissional</strong>
+                            <strong>{t('patients.reviewJustification')}</strong>
                             <p>{patientSummary?.justification}</p>
                         </>
                     )}
 
-                    <small>Ao gerar este resumo, dados clínicos são enviados à API Gemini.</small>
+                    <small>{t('patients.geminiSummaryDisclaimer')}</small>
                 </Card>
             )}
 
             <Card className="patient-history-card">
-                <h2>Histórico clínico</h2>
+                <h2>{t('evolution.history')}</h2>
 
                 {patientEvolutions.length > 0 ? (
                     <div className="patient-history-timeline">
@@ -279,14 +268,14 @@ export function PatientDetails() {
                                 <div className="patient-history-item__card">
                                     <div className="patient-history-item__header">
                                         <strong>
-                                            {formatDateTime(evolution.evolutionDate)} · {evolution.professionalName ?? 'Sem profissional'}
+                                            {formatDateTime(evolution.evolutionDate)} · {evolution.professionalName ?? t('common.noProfessional')}
                                         </strong>
 
                                         <Badge
                                             className={`attention-badge attention-badge--${evolution.attentionLevel.toLowerCase()}`}
                                             tone={attentionTones[evolution.attentionLevel]}
                                         >
-                                            Atenção: {attentionLabels[evolution.attentionLevel]}
+                                            {t('evolution.attention')}: {t(`priority.${evolution.attentionLevel}`)}
                                         </Badge>
                                     </div>
 
@@ -296,12 +285,12 @@ export function PatientDetails() {
 
                                     <div className="patient-history-item__details">
                                         <div>
-                                            <span>Evolução</span>
+                                            <span>{t('evolution.description')}</span>
                                             <p>{evolution.description}</p>
                                         </div>
 
                                         <div>
-                                            <span>Conduta</span>
+                                            <span>{t('evolution.conduct')}</span>
                                             <p>{evolution.conduct}</p>
                                         </div>
                                     </div>
@@ -312,7 +301,7 @@ export function PatientDetails() {
                     </div>
                 ) : (
                     <div className="patient-history-empty">
-                        Nenhuma evolução clínica registrada para este paciente.
+                        {t('evolution.noHistory')}
                     </div>
                 )}
 
