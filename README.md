@@ -31,6 +31,20 @@ PostgreSQL.
 | Infraestrutura local | Docker, Docker Compose, Nginx, Mailpit                                   |
 | Integração externa   | API Gemini para apoio à análise de evoluções clínicas                    |
 
+## Deploy
+
+- Repositório: [https://github.com/C-Fernandes/CliniCare](https://github.com/C-Fernandes/CliniCare)
+- Aplicação publicada: [https://clini-care-ruddy.vercel.app/](https://clini-care-ruddy.vercel.app/)
+
+O deploy permite acessar a interface publicada na internet. O envio de e-mails
+transacionais, como aprovação de conta e recuperação de senha, não está
+habilitado no ambiente publicado porque depende de um remetente/domínio
+verificado e de um provedor de e-mail compatível com a infraestrutura de
+deploy. No plano gratuito do Render, conexões SMTP de saída nas portas comuns
+`25`, `465` e `587` podem ser bloqueadas para reduzir abuso e envio de spam em
+infraestrutura compartilhada. Por isso, o fluxo de e-mail funciona no ambiente
+local com Mailpit, mas não deve ser considerado disponível no deploy atual.
+
 ## Arquitetura
 
 A documentação abaixo utiliza o **C4 Model** em três níveis: contexto,
@@ -391,19 +405,19 @@ cd backend
 
 ## Aderência ao Desafio
 
-| Requisito                         | Estado    | Observação                                                 |
-| --------------------------------- | --------- | ---------------------------------------------------------- |
-| Cadastro e listagem de pacientes  | Concluído | Disponível no frontend e no backend                        |
-| Edição de pacientes               | Concluído | Disponível na listagem e nos detalhes                      |
-| Cadastro de evoluções clínicas    | Concluído | Disponível nos detalhes do paciente                        |
-| Visualização do histórico clínico | Concluído | Disponível nos detalhes do paciente                        |
-| Notificações assíncronas          | Concluído | Implementadas com `@Async`                                 |
-| API REST, React e PostgreSQL      | Concluído | Estrutura full stack implementada                          |
-| Docker Compose                    | Concluído | Variáveis configuráveis e proxy Nginx incluídos            |
-| Aplicação publicada na internet   | Pendente  | É necessário publicar e adicionar o link                   |
-| README com documentação           | Concluído | Instruções, arquitetura, decisões e melhorias documentadas |
-| Integração com LLM                | Concluído | Endpoint Gemini conectado ao formulário de evolução        |
-| Documentação C4 Model             | Concluído | Contexto, contêineres e componentes documentados           |
+| Requisito                         | Estado    | Observação                                                  |
+| --------------------------------- | --------- | ----------------------------------------------------------- |
+| Cadastro e listagem de pacientes  | Concluído | Disponível no frontend e no backend                         |
+| Edição de pacientes               | Concluído | Disponível na listagem e nos detalhes                       |
+| Cadastro de evoluções clínicas    | Concluído | Disponível nos detalhes do paciente                         |
+| Visualização do histórico clínico | Concluído | Disponível nos detalhes do paciente                         |
+| Notificações assíncronas          | Concluído | Implementadas com `@Async`                                  |
+| API REST, React e PostgreSQL      | Concluído | Estrutura full stack implementada                           |
+| Docker Compose                    | Concluído | Variáveis configuráveis e proxy Nginx incluídos             |
+| Aplicação publicada na internet   | Concluído | Deploy disponível em `https://clini-care-ruddy.vercel.app/` |
+| README com documentação           | Concluído | Instruções, arquitetura, decisões e melhorias documentadas  |
+| Integração com LLM                | Concluído | Endpoint Gemini conectado ao formulário de evolução         |
+| Documentação C4 Model             | Concluído | Contexto, contêineres e componentes documentados            |
 
 ## Melhorias Futuras
 
