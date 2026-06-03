@@ -403,22 +403,6 @@ cd backend
 ./mvnw test
 ```
 
-## Aderência ao Desafio
-
-| Requisito                         | Estado    | Observação                                                  |
-| --------------------------------- | --------- | ----------------------------------------------------------- |
-| Cadastro e listagem de pacientes  | Concluído | Disponível no frontend e no backend                         |
-| Edição de pacientes               | Concluído | Disponível na listagem e nos detalhes                       |
-| Cadastro de evoluções clínicas    | Concluído | Disponível nos detalhes do paciente                         |
-| Visualização do histórico clínico | Concluído | Disponível nos detalhes do paciente                         |
-| Notificações assíncronas          | Concluído | Implementadas com `@Async`                                  |
-| API REST, React e PostgreSQL      | Concluído | Estrutura full stack implementada                           |
-| Docker Compose                    | Concluído | Variáveis configuráveis e proxy Nginx incluídos             |
-| Aplicação publicada na internet   | Concluído | Deploy disponível em `https://clini-care-ruddy.vercel.app/` |
-| README com documentação           | Concluído | Instruções, arquitetura, decisões e melhorias documentadas  |
-| Integração com LLM                | Concluído | Endpoint Gemini conectado ao formulário de evolução         |
-| Documentação C4 Model             | Concluído | Contexto, contêineres e componentes documentados            |
-
 ## Melhorias Futuras
 
 - Permitir anexar exames e documentos ao histórico de cada paciente.
