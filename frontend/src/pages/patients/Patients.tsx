@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Eye, Pencil, Plus, Search } from 'lucide-react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
+import { Pencil, Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PatientModal } from '../../components/PatientModal/PatientModal';
@@ -101,6 +101,17 @@ export function Patients() {
         setIsPatientModalOpen(true);
     }
 
+    function openPatientDetails(patientId: number) {
+        navigate(`/patients/${patientId}`);
+    }
+
+    function handlePatientRowKeyDown(event: KeyboardEvent<HTMLTableRowElement>, patientId: number) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPatientDetails(patientId);
+        }
+    }
+
     function closePatientModal() {
         setSelectedPatient(null);
         setIsPatientModalOpen(false);
@@ -169,7 +180,15 @@ export function Patients() {
 
                 <tbody>
                     {patients.map((patient) => (
-                        <tr key={patient.id}>
+                        <tr
+                            key={patient.id}
+                            aria-label={`Abrir detalhes de ${patient.name}`}
+                            className="patients-table-row"
+                            onClick={() => openPatientDetails(patient.id)}
+                            onKeyDown={(event) => handlePatientRowKeyDown(event, patient.id)}
+                            role="button"
+                            tabIndex={0}
+                        >
                             <td>
                                 <strong>{patient.name}</strong>
                             </td>
@@ -190,15 +209,11 @@ export function Patients() {
                             <td>
                                 <div className="patients-actions">
                                     <IconButton
-                                        label="Ver histórico"
-                                        onClick={() => navigate(`/patients/${patient.id}`)}
-                                    >
-                                        <Eye size={18} />
-                                    </IconButton>
-
-                                    <IconButton
                                         label="Editar paciente"
-                                        onClick={() => openEditPatientModal(patient)}
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            openEditPatientModal(patient);
+                                        }}
                                     >
                                         <Pencil size={18} />
                                     </IconButton>
