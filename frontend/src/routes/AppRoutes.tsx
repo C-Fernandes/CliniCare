@@ -1,16 +1,16 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import { Login } from '../pages/login/Login';
-import { Register } from '../pages/register/Register';
-import { ForgotPassword } from '../pages/forgotPassword/ForgotPassword';
-import { ResetPassword } from '../pages/resetPassword/ResetPassword';
-import { PendingApproval } from '../pages/pendingApproval/PendingApproval';
+import { Login } from '../pages/Login/Login';
+import { Register } from '../pages/Register/Register';
+import { ForgotPassword } from '../pages/ForgotPassword/ForgotPassword';
+import { ResetPassword } from '../pages/ResetPassword/ResetPassword';
+import { PendingApproval } from '../pages/PendingApproval/PendingApproval';
 import { AppLayout } from '../layouts/appLayout/AppLayout';
-import { Dashboard } from '../pages/dashboard/Dashboard';
-import { Patients } from '../pages/patients/Patients';
-import { Notifications } from '../pages/notifications/Notifications';
-import { Users } from '../pages/users/Users';
-import { Profile } from '../pages/profile/Profile';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
+import { Patients } from '../pages/Patients/Patients';
+import { Notifications } from '../pages/Notifications/Notifications';
+import { Users } from '../pages/Users/Users';
+import { Profile } from '../pages/Profile/Profile';
 import { PatientDetails } from '../pages/PatientDetails/PatientDetails';
 import { RouteGuard } from '../guards/RouteGuard';
 
