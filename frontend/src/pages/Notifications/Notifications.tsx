@@ -75,6 +75,7 @@ export function Notifications() {
                         : notification
                 )
             );
+            window.dispatchEvent(new CustomEvent('clinicare:notifications-updated'));
             showToast({ message: t('notifications.markReadSuccess'), type: 'success' });
         } catch (requestError) {
             showToast({
